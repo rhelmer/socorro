@@ -28,7 +28,7 @@ phpunit:
 install: java_analysis reinstall
 
 # this a dev-only option, `java_analysis` needs to be run at least once in the checkout (or after `make clean`)
-reinstall: install-socorro install-web install-submodules virtualenv
+reinstall: install-socorro install-web virtualenv
 	# record current git revision in install dir
 	git rev-parse HEAD > $(PREFIX)/revision.txt
 	REV=`cat $(PREFIX)/revision.txt` && sed -ibak "s/CURRENT_SOCORRO_REVISION/$$REV/" $(PREFIX)/htdocs/application/config/revision.php
@@ -57,15 +57,9 @@ install-web:
 	cd $(PREFIX)/htdocs/application/config; for file in *.php-dist; do cp $$file `basename $$file -dist`; done
 	cd $(PREFIX)/htdocs; cp htaccess-dist .htaccess
 
-install-submodules:
-	# clone submodule dependencies
-	git submodule update --init --recursive
-	cd configman; python setup.py install --install-lib=$(ABS_PREFIX)/application
-
 virtualenv:
 	virtualenv $(VIRTUALENV)
 	$(VIRTUALENV)/bin/pip install -r requirements.txt
-	cd configman; $(VIRTUALENV)/bin/python setup.py install
 
 coverage: setup-test phpunit
 	rm -f coverage.xml
@@ -77,7 +71,6 @@ lint:
 
 clean:
 	find ./socorro/ -type f -name "*.pyc" -exec rm {} \;
-	find ./thirdparty/ -type f -name "*.pyc" -exec rm {} \;
 	rm -rf ./google-breakpad/ ./builds/ ./breakpad/ ./stackwalk
 	rm -rf ./breakpad.tar.gz
 	cd analysis && ant clean

@@ -10,3 +10,4 @@ lxml
 isodate
 configobj
 statsd
+configman
