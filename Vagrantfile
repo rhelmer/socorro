@@ -16,7 +16,7 @@ CONF = _config
 
 
 Vagrant::Config.run do |config|
-  config.vm.box_url = "http://files.vagrantup.com/lucid64.box"
+  config.vm.box_url = "http://people.mozilla.org/~rhelmer/socorro-all_v1.box"
   config.vm.box = "socorro-all"
   config.vm.network :hostonly, "33.33.33.10"
   config.vm.customize ["modifyvm", :id, "--memory", CONF['memory']]
@@ -33,6 +33,6 @@ Vagrant::Config.run do |config|
     end
   end
   Vagrant::Config.run do |config|
-    config.vm.share_folder("socorro-code", "/home/socorro/dev/socorro", "./", :nfs => false, :group => "admin")
+    config.vm.share_folder("socorro-code", "/home/socorro/dev/socorro", "./", :nfs => false, :owner => "socorro")
   end
 end
