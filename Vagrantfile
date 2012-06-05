@@ -33,6 +33,6 @@ Vagrant::Config.run do |config|
     end
   end
   Vagrant::Config.run do |config|
-    config.vm.share_folder("socorro-code", "/home/socorro/dev/socorro", "./", :nfs => false, :owner => "socorro")
+    config.vm.share_folder("socorro-code", "/home/socorro/dev/socorro", "./", :nfs => false, :group => "admin")
   end
 end
