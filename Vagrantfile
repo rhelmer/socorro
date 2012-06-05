@@ -33,6 +33,6 @@ Vagrant::Config.run do |config|
     end
   end
   Vagrant::Config.run do |config|
-    config.vm.share_folder("socorro-code", "/home/socorro/dev/socorro", "./", :nfs => false, :owner => "jenkins")
+    config.vm.share_folder("socorro-code", "/home/socorro/dev/socorro", "./", :nfs => false)
   end
 end
