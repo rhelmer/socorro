@@ -168,7 +168,7 @@ class socorro-python inherits socorro-base {
     }
 
     exec {
-        '/usr/bin/make minidump_stackwalk':
+        'cd /home/socorro/dev/socorro && /usr/bin/make minidump_stackwalk':
             alias => 'minidump_stackwalk-install',
             cwd => '/home/socorro/dev/socorro',
             creates => '/home/socorro/dev/socorro/stackwalk',
