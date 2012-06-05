@@ -81,7 +81,7 @@ clean:
 	cd analysis && ant clean
 
 minidump_stackwalk:
-	svn --config-dir $(HOME)/.subversion co http://google-breakpad.googlecode.com/svn/trunk google-breakpad
+	svn --config-dir /home/socorro/.subversion co http://google-breakpad.googlecode.com/svn/trunk google-breakpad
 	cd google-breakpad && ./configure --prefix=`pwd`/../stackwalk/
 	cd google-breakpad && make install
 	cd google-breakpad && svn info | grep Revision | cut -d' ' -f 2 > ../stackwalk/revision.txt
