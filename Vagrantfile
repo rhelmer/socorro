@@ -16,6 +16,7 @@ CONF = _config
 
 
 Vagrant::Config.run do |config|
+  config.vm.box_url = "http://files.vagrantup.com/lucid64.box"
   config.vm.box = "socorro-all"
   config.vm.network :hostonly, "33.33.33.10"
   config.vm.customize ["modifyvm", :id, "--memory", CONF['memory']]
