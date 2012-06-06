@@ -22,7 +22,7 @@ Vagrant::Config.run do |config|
   config.vm.network :hostonly, "33.33.33.10"
   config.vm.customize ["modifyvm", :id, "--memory", CONF['memory']]
   # enable symlinks for vbox shared folders
-  config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/SHARE_NAME", "1"]
+  config.vm.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/socorro-code", "1"]
 
   if CONF['boot_mode'] == 'gui'
     config.vm.boot_mode = :gui
