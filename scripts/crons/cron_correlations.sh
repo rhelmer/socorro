@@ -13,7 +13,6 @@ NAME=`basename $0 .sh`
 COLUMNS="filename,debug_file,debug_id,module_version,product,version,os_name,reason"
 DATE=`date -d 'yesterday' +%y%m%d`
 OUTPUT_DATE=`date -d $DATE +%Y%m%d`
-OUTPUT_FILE="/mnt/crashanalysis/crash_analysis/correlations/correlations-${OUTPUT_DATE}.txt"
 lock $NAME
 
 export PIG_CLASSPATH=${SOCORRO_DIR}/analysis
@@ -28,11 +27,8 @@ fatal $? "could not write header to tmpfile"
 hadoop fs -cat correlations-${DATE}-${DATE} >> $TMPFILE
 fatal $? "hadoop cat failed writing to tmpfile"
 
-cat $OUTPUT_FILE | psql -U $databaseUserName -h $databaseHost $databaseName -c 'COPY correlations_raw FROM STDIN WITH CSV HEADER'
+cat $TMPFILE | psql -U $databaseUserName -h $databaseHost $databaseName -c 'COPY correlations_raw FROM STDIN WITH CSV HEADER'
 fatal $? "writing correlations to DB failed"
-
-mv $TMPFILE $OUTPUT_FILE
-fatal $? "could not move tmpfile to output dir"
 
 hadoop fs -rmr correlations-${DATE}-${DATE}
 fatal $? "hadoop cleanup failed"
