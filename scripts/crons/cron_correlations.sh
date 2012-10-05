@@ -16,6 +16,8 @@ OUTPUT_DATE=`date -d $DATE +%Y%m%d`
 OUTPUT_FILE="/mnt/crashanalysis/crash_analysis/correlations/correlations-${OUTPUT_DATE}.txt"
 lock $NAME
 
+export PIG_CLASSPATH=${SOCORRO_DIR}/analysis
+
 pig -param start_date=$DATE -param end_date=$DATE ${SOCORRO_DIR}/analysis/correlations.pig >> /var/log/socorro/cron_correlations.log 2>&1
 fatal $? "pig run failed"
 
