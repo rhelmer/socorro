@@ -118,9 +118,6 @@ Download and install Socorro
 Clone from github
 ::
   git clone https://github.com/mozilla/socorro
-  cd socorro
-  # TODO 
-  cp -rp config/production/* config/
 
 By default, you will be tracking the latest development release. If you would
 like to use a stable release, determine latest release tag from our release tracking wiki: https://wiki.mozilla.org/Socorro:Releases#Previous_Releases
@@ -130,6 +127,15 @@ Then make sure to checkout the latest tag before continuing
   git checkout LATEST_RELEASE_TAG
 
 Customize the .ini files in config/ as necessary. The rest of this guide will assume that the defaults are used.
+
+Download and install CrashStats Web UI
+````````````
+
+Clone from github
+::
+  git clone https://github.com/mozilla/socorro
+
+Read the INSTALL.md for installation instructions.
 
 
 Populate PostgreSQL Database
@@ -161,8 +167,34 @@ This is the binary which processes breakpad crash dumps into stack traces:
 Run socorro in dev mode
 ````````````
 
-TODO you are now ready to run Socorro in dev mode
+Set up environment
+::
+  make virtualenv
+  . socorro-virtualenv/bin/activate
+  export PYTHONPATH=.
 
+Run collector
+::
+  python socorro/collector/collector_app.py
+
+Run monitor
+::
+  python socorro/monitor/monitor_app.py
+
+Run processor
+::
+  python socorro/processor/monitor_app.py
+
+Run middleware
+::
+  python middleware/middleware/middleware_app.py
+
+Run socorro-crashstats in dev mode
+````````````
+
+Configure socorro-crashstats/crashstats/settings/local.py to point at your local middlware server
+::
+  MWARE_BASE_URL=http://localhost:8882
 
 Production install
 ````````````
@@ -183,14 +215,15 @@ See: https://developer.mozilla.org/en/Environment_variables_affecting_crash_repo
 If you already have a crash available and wish to submit it, you can
 use the standalone submitter tool:
 
-From inside the Socorro checkout, as the *socorro* user:
+Set up environment
 ::
-  virtualenv socorro-virtualenv
+  make virtualenv
   . socorro-virtualenv/bin/activate
-  pip install poster
-  cp scripts/config/submitterconfig.py.dist scripts/config/submitterconfig.py
-  export PYTHONPATH=.:thirdparty
-  python scripts/submitter.py -u http://crash-reports/submit -j ~/Downloads/crash.json -d ~/Downloads/crash.dump
+  export PYTHONPATH=.
+
+Run submitter tool (assuming your crash is called "crash.json" and "crash.dump")
+::
+  python socorro/collector/submitter_app.py -u http://crash-reports/submit -j crash.json -d crash.dump
 
 You should get a "CrashID" returned.
 Check syslog logs for user.*, should see the CrashID returned being collected.
