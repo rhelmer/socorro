@@ -173,21 +173,12 @@ Set up environment
   . socorro-virtualenv/bin/activate
   export PYTHONPATH=.
 
-Run collector
+Run Socorro servers
 ::
-  python socorro/collector/collector_app.py
-
-Run monitor
-::
-  python socorro/monitor/monitor_app.py
-
-Run processor
-::
-  python socorro/processor/monitor_app.py
-
-Run middleware
-::
-  python middleware/middleware/middleware_app.py
+  python socorro/collector/collector_app.py > collector.log &
+  python socorro/processor/processor.py > processor.log &
+  python socorro/monitor/monitor_app.py > monitor.log &
+  python middleware/middleware/middleware_app.py > middleware.log &
 
 Run socorro-crashstats in dev mode
 ````````````
