@@ -180,6 +180,17 @@ Run Socorro servers - NOTE you should use different terminals for each, perhaps 
   python socorro/monitor/monitor_app.py
   python middleware/middleware/middleware_app.py
 
+This uses built-in defaults for configuration. If you need to modify this, for example to change the HTTP port for the middlware service, you need to copy the default config and modify it
+::
+  cp config/middleware.ini-dist config/middleware.ini
+
+Edit config/middleware.ini, then start up middleware with the --admin.conf flag
+::
+  python middleware/middleware/middleware_app.py --admin.conf=./config/middleware.ini
+
+If you want to modify something that is common across config files like PostgreSQL username/hostname/etc, make sure to see config/common_database.ini and the "+include" line in the service-specific config files (such as collector.ini, processor.ini and monitor.ini)
+
+
 Run socorro-crashstats in dev mode
 ````````````
 
