@@ -126,7 +126,7 @@ Then make sure to checkout the latest tag before continuing
 ::
   git checkout LATEST_RELEASE_TAG
 
-Customize the .ini files in config/ as necessary. The rest of this guide will assume that the defaults are used.
+Copy the .ini-dist files in config/ as necessary. The rest of this guide will assume that the defaults are used.
 
 Download and install CrashStats Web UI
 ````````````
