@@ -173,12 +173,12 @@ Set up environment
   . socorro-virtualenv/bin/activate
   export PYTHONPATH=.
 
-Run Socorro servers
+Run Socorro servers - NOTE you should use different terminals for each, perhaps in a screen session
 ::
-  python socorro/collector/collector_app.py > collector.log &
-  python socorro/processor/processor.py > processor.log &
-  python socorro/monitor/monitor_app.py > monitor.log &
-  python middleware/middleware/middleware_app.py > middleware.log &
+  python socorro/collector/collector_app.py
+  python socorro/processor/processor.py
+  python socorro/monitor/monitor_app.py
+  python middleware/middleware/middleware_app.py
 
 Run socorro-crashstats in dev mode
 ````````````
