@@ -72,12 +72,6 @@ edit /etc/postgresql/9.2/main/postgresql.conf
 ::
   timezone = UTC 
 
-Add a new superuser account to postgres
-::
-  sudo su - postgres
-  createuser -s -W YOUR_USERNAME_GOES_HERE
-  exit
-
 Restart PostgreSQL to activate config changes
 ::
   sudo /usr/sbin/service postgresql restart 
@@ -111,6 +105,14 @@ Restart PostgreSQL to activate config changes
 ::
   sudo /usr/sbin/service postgresql restart 
 
+Add a new superuser account to postgres
+````````````
+
+By default, Socorro expects a user called "breakpad"
+::
+  sudo su - postgres
+  createuser -s breakpad
+  exit
 
 Download and install Socorro
 ````````````
@@ -121,8 +123,6 @@ Clone from github
 
 By default, you will be tracking the latest development release. If you would
 like to use a stable release, determine latest release tag from our release tracking wiki: https://wiki.mozilla.org/Socorro:Releases#Previous_Releases
-
-Then make sure to checkout the latest tag before continuing
 ::
   git checkout LATEST_RELEASE_TAG
 
@@ -136,6 +136,11 @@ Clone from github
   git clone https://github.com/mozilla/socorro
 
 Read the INSTALL.md for installation instructions.
+
+By default, you will be tracking the latest development release. If you would
+like to use a stable release, determine latest release tag from our release tracking wiki: https://wiki.mozilla.org/Socorro:Releases#Previous_Releases
+::
+  git checkout LATEST_RELEASE_TAG
 
 
 Populate PostgreSQL Database
