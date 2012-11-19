@@ -22,16 +22,16 @@ There are two main parts to Socorro:
 
 1) collects, processes, and allows real-time searches and results for individual crash reports
 
-  This requires both PostgreSQL, as well as the Collector, Monitor, Processor and Middleware and Web UI. 
+  This requires both PostgreSQL, as well as the Collector, Monitor, Processor and Middleware and Web UI.
 
-  Individual crash reports are pulled from long-term storage using the 
+  Individual crash reports are pulled from long-term storage using the
   /report/index/ page, for example: https://crash-stats.mozilla.com/report/index/ba8c248f-79ff-46b4-97b8-a33362121113
 
   The search feature is at: https://crash-stats.mozilla.com/query
 
 2) a set of batch jobs which compiles aggregate reports and graphs, such as "Top Crashes by Signature"
 
-  This requires PostgreSQL, Middleware and Web UI. It triggered once per day by the "daily_matviews" cron job, 
+  This requires PostgreSQL, Middleware and Web UI. It triggered once per day by the "daily_matviews" cron job,
   covering data processed in the previous UTC day.
 
   Every other page on https://crash-stats.mozilla.com is of this type, for example the Topcrashers report: https://crash-stats.mozilla.com/topcrasher/byversion/Firefox
@@ -71,11 +71,11 @@ Install dependencies
 
 edit /etc/postgresql/9.2/main/postgresql.conf
 ::
-  timezone = UTC 
+  timezone = UTC
 
 Restart PostgreSQL to activate config changes
 ::
-  sudo /usr/sbin/service postgresql restart 
+  sudo /usr/sbin/service postgresql restart
 
 
 RHEL/CentOS 6
@@ -98,7 +98,7 @@ edit /var/lib/pgsql/data/postgresql.conf
 
 Restart PostgreSQL to activate config changes
 ::
-  sudo /usr/sbin/service postgresql restart 
+  sudo /usr/sbin/service postgresql restart
 
 Add a new superuser account to postgres
 ````````````
@@ -195,7 +195,9 @@ Run Socorro servers - NOTE you should use different terminals for each, perhaps 
   python socorro/processor/processor.py --admin.conf=./config/processor.ini
   python socorro/monitor/monitor.py --admin.conf=./config/monitor.ini
 
-This uses built-in defaults for configuration. If you need to modify these, for example to change the HTTP port for the middlware service so that it does not conflict with the collector, you need to copy the default config
+This uses built-in defaults for configuration. If you need to modify
+this, for example to change the HTTP port for the middlware service,
+you need to copy the default config
 ::
   edit config/middleware.ini
 
@@ -205,7 +207,7 @@ Change the port so as not to conflict with collector
 
 Then start up middleware with the --admin.conf flag
 ::
-  python middleware/middleware/middleware_app.py --admin.conf=./config/middleware.ini
+  python socorro/middleware/middleware_app.py --admin.conf=config/middleware.ini
 
 If you want to modify something that is common across config files like PostgreSQL username/hostname/etc, make sure to see config/common_database.ini and the "+include" line in the service-specific config files (such as collector.ini, processor.ini and monitor.ini). This is optional but recommended.
 
@@ -213,9 +215,10 @@ If you want to modify something that is common across config files like PostgreS
 Run socorro-crashstats in dev mode
 ````````````
 
-Configure socorro-crashstats/crashstats/settings/local.py to point at your local middlware server
+Configure socorro-crashstats/crashstats/settings/local.py to point at
+your local middleware server
 ::
-  MWARE_BASE_URL=http://localhost:8882
+  MWARE_BASE_URL=http://localhost:8883
 
 Production install
 ````````````
@@ -252,4 +255,3 @@ Check syslog logs for user.*, should see the CrashID returned being collected.
 Attempt to pull up the newly inserted crash: http://crash-stats/report/index/YOUR_CRASH_ID_GOES_HERE
 
 The (syslog "user" facility) logs should show this new crash being inserted for priority processing, and it should be available shortly thereafter.
-
