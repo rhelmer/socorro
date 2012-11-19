@@ -182,7 +182,7 @@ This uses built-in defaults for configuration. If you need to modify this, for e
 ::
   cp config/middleware.ini-dist config/middleware.ini
 
-Edit config/middleware.ini, then start up middleware with the --admin.conf flag
+Then start up middleware with the --admin.conf flag
 ::
   python middleware/middleware/middleware_app.py --admin.conf=./config/middleware.ini
 
