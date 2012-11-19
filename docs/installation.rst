@@ -46,7 +46,7 @@ Installation Requirements
 
    You will need to `produce symbols for your application <http://code.google.com/p/google-breakpad/wiki/LinuxStarterGuide#Producing_symbols_for_your_application>`_ and make these files available to Socorro.
 
-* Mac OS X or Linux (tested on Ubuntu Lucid and RHEL/CentOS 6)
+* Mac OS X or Linux (Ubuntu/RHEL)
 * PostgreSQL 9.2
 * Python 2.6
 * C++ compiler
@@ -61,12 +61,13 @@ Install dependencies
 ::
   sudo brew ...
 
-Ubuntu
+Ubuntu 12.04 (Precise)
 ````````````
 Install dependencies
 ::
+  sudo add-apt-repository ppa:pitti/postgresql
+  sudo apt-get update
   sudo apt-get install build-essential python-software-properties subversion libpq-dev python-virtualenv python-dev postgresql-9.2 postgresql-plperl-9.2 postgresql-contrib-9.2 rsync
-
 
 edit /etc/postgresql/9.2/main/postgresql.conf
 ::
@@ -77,7 +78,7 @@ Restart PostgreSQL to activate config changes
   sudo /usr/sbin/service postgresql restart 
 
 
-RHEL/Centos
+RHEL/CentOS 6
 ````````````
 * Add PostgreSQL 9.2 yum repo from http://www.postgresql.org/download/linux#yum
 
