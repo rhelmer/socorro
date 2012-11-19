@@ -178,7 +178,7 @@ Run Socorro servers - NOTE you should use different terminals for each, perhaps 
   python socorro/processor/processor.py
   python socorro/monitor/monitor_app.py
 
-This uses built-in defaults for configuration. If you need to modify this, for example to change the HTTP port for the middlware service, you need to copy the default config and modify it
+This uses built-in defaults for configuration. If you need to modify this, for example to change the HTTP port for the middlware service so that it does not conflict with the collector, you need to copy the default config
 ::
   cp config/middleware.ini-dist config/middleware.ini
 
