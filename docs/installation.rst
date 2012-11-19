@@ -95,12 +95,6 @@ edit /var/lib/pgsql/data/postgresql.conf
 ::
   timezone = UTC
 
-Add a new superuser account to postgres
-::
-  sudo su - postgres
-  createuser -s -W YOUR_USERNAME_GOES_HERE
-  exit
-
 Restart PostgreSQL to activate config changes
 ::
   sudo /usr/sbin/service postgresql restart 
