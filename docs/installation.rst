@@ -182,21 +182,32 @@ Set up environment
   . socorro-virtualenv/bin/activate
   export PYTHONPATH=.
 
+Copy default config files
+::
+  cp config/collector.ini-dist config/collector.ini
+  cp config/processor.ini-dist config/processor.ini
+  cp config/monitor.ini-dist config/monitor.ini
+  cp config/middleware.ini-dist config/middleware.ini
+
 Run Socorro servers - NOTE you should use different terminals for each, perhaps in a screen session
 ::
-  python socorro/collector/collector_app.py
-  python socorro/processor/processor.py
-  python socorro/monitor/monitor_app.py
+  python socorro/collector/collector_app.py --admin.conf=./config/collector.ini
+  python socorro/processor/processor.py --admin.conf=./config/processor.ini
+  python socorro/monitor/monitor.py --admin.conf=./config/monitor.ini
 
-This uses built-in defaults for configuration. If you need to modify this, for example to change the HTTP port for the middlware service so that it does not conflict with the collector, you need to copy the default config
+This uses built-in defaults for configuration. If you need to modify these, for example to change the HTTP port for the middlware service so that it does not conflict with the collector, you need to copy the default config
 ::
-  cp config/middleware.ini-dist config/middleware.ini
+  edit config/middleware.ini
+
+Change the port so as not to conflict with collector
+::
+  port='8883'
 
 Then start up middleware with the --admin.conf flag
 ::
   python middleware/middleware/middleware_app.py --admin.conf=./config/middleware.ini
 
-If you want to modify something that is common across config files like PostgreSQL username/hostname/etc, make sure to see config/common_database.ini and the "+include" line in the service-specific config files (such as collector.ini, processor.ini and monitor.ini)
+If you want to modify something that is common across config files like PostgreSQL username/hostname/etc, make sure to see config/common_database.ini and the "+include" line in the service-specific config files (such as collector.ini, processor.ini and monitor.ini). This is optional but recommended.
 
 
 Run socorro-crashstats in dev mode
