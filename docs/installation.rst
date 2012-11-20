@@ -106,7 +106,13 @@ Add a new superuser account to postgres
 By default, Socorro expects a user called "breakpad"
 ::
   sudo su - postgres
-  createuser -s breakpad
+
+  # create a superuser account for yourself
+  createuser -s $YOUR_USERNAME_HERE
+
+  # socorro will use this, should not be a superuser
+  createuser -W breakpad_r
+
   exit
 
 Download and install Socorro
@@ -119,7 +125,7 @@ Clone from github
 By default, you will be tracking the latest development release. If you would
 like to use a stable release, determine latest release tag from our release tracking wiki: https://wiki.mozilla.org/Socorro:Releases#Previous_Releases
 ::
-  git checkout LATEST_RELEASE_TAG
+  git checkout $LATEST_RELEASE_TAG
 
 Copy the .ini-dist files in config/ as necessary. The rest of this guide will assume that the defaults are used.
 
@@ -135,7 +141,7 @@ Read the INSTALL.md for installation instructions.
 By default, you will be tracking the latest development release. If you would
 like to use a stable release, determine latest release tag from our release tracking wiki: https://wiki.mozilla.org/Socorro:Releases#Previous_Releases
 ::
-  git checkout LATEST_RELEASE_TAG
+  git checkout $LATEST_RELEASE_TAG
 
 
 Populate PostgreSQL Database
