@@ -17,9 +17,7 @@ Customize CSV files
 Socorro comes with a set of CSV files you can customize and use to bootstrap
 your database.
 
-Shut down all Socorro services, drop your database (if needed) and load 
-the schema.
-From inside the Socorro checkout, as *postgres* user:
+Load the Socorro schema
 ::
   make virtualenv
   . socorro-virtualenv/bin/activate
@@ -35,10 +33,9 @@ product name and version history, if you are setting this up for production.
 
 Also, note that the backfill procedure will ignore build IDs over 30 days old.
 
-From inside the Socorro checkout, as the *postgres* user:
+After modifying CSV files, use the import script to load the data
 ::
   cd tools/dataload
-  edit \*.csv
   ./import.sh
 
 See :ref:`databasetablesbysource-chapter` for a complete explanation
@@ -63,5 +60,6 @@ you need to make adjustments.
 
 There also needs to be at least one featured version, which is
 controlled by setting "featured_version" column to "true" for one
-or more rows in the product_version table.
+or more rows in the product_version table. The import script will go
+ahead and set all imported versions as featured.
 
