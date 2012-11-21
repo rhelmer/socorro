@@ -146,19 +146,6 @@ like to use a stable release, determine latest release tag from our release trac
 ::
   git checkout $LATEST_RELEASE_TAG
 
-
-Populate PostgreSQL Database
-````````````
-TODO if you just want to get a test system up and running, you may generate
-and load synthetic test data using the script at FIXME
-
-Refer to :ref:`populatepostgres-chapter` for information about
-loading the schema and populating the database.
-
-This step is *required* to get basic information about existing product names
-and versions into the system.
-
-
 Run unit/functional tests
 ````````````
 From inside the Socorro checkout, as the *socorro* user:
@@ -172,6 +159,13 @@ This is the binary which processes breakpad crash dumps into stack traces:
 ::
   make minidump_stackwalk
 
+Populate PostgreSQL Database
+````````````
+Refer to :ref:`populatepostgres-chapter` for information about
+loading the schema and populating the database.
+
+This step is *required* to get basic information about existing product names
+and versions into the system.
 
 Run socorro in dev mode
 ````````````
