@@ -17,11 +17,14 @@ Customize CSV files
 Socorro comes with a set of CSV files you can customize and use to bootstrap
 your database.
 
-Load the Socorro schema
+Set up environment
 ::
   make virtualenv
   . socorro-virtualenv/bin/activate
   export PYTHONPATH=.
+
+Load the Socorro schema
+::
   ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad
 
 Customize CSVs in tools/dataload/, at minimum you probably need to bump the dates and build IDs in
