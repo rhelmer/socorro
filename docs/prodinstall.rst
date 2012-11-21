@@ -66,8 +66,8 @@ From inside the Socorro checkout, as the *root* user:
   cp puppet/files/etc_crond/socorro /etc/cron.d/
 
 Socorro's cron jobs are moving to a new cronjob manager called :ref:`crontabber-chapter`.
-:ref:`crontabber-chapter` runs every 5 minutes from the system crontab, and looks inside
-the config/ directory for it's configuration.
+:ref:`crontabber-chapter` runs every 5 minutes from the system crontab,
+and looks inside the config/ directory for it's configuration.
 
 However some configuration is shared and site-specific, so is expected to
 be in the system directory /etc/socorro :
