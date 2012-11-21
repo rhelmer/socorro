@@ -45,8 +45,8 @@ graphs and show reports such as "Top Crash By Signature".
 IMPORTANT NOTE - many reports use the reports_clean_done() stored
 procedure to check that reports exist for the last UTC hour of the
 day being processed, as a way to catch problems. If your crash 
-volume is low enough, you may want to modify this function 
-in socorro/sql/schema.sql and reload the schema
+volume does not guarantee one crash per hour, you may want to modify
+this function in socorro/sql/schema.sql and reload the schema
 ::
 
   ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dropdb
