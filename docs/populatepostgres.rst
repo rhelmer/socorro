@@ -21,10 +21,13 @@ Shut down all Socorro services, drop your database (if needed) and load
 the schema.
 From inside the Socorro checkout, as *postgres* user:
 ::
-  export PYTHONPATH=/data/socorro/application:/data/socorro/thirdparty
+  make virtualenv
+  . socorro-virtualenv/bin/activate
+  export PYTHONPATH=.
   ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad
 
-Customize CSVs, at minimum you probably need to bump the dates and build IDs in: 
+Customize CSVs in tools/dataload/, at minimum you probably need to bump the dates and build IDs in
+::
   raw_adu.csv reports.csv releases_raw.csv
 
 You will probably want to change "WaterWolf" to your own
@@ -35,7 +38,7 @@ Also, note that the backfill procedure will ignore build IDs over 30 days old.
 From inside the Socorro checkout, as the *postgres* user:
 ::
   cd tools/dataload
-  edit *.csv
+  edit \*.csv
   ./import.sh
 
 See :ref:`databasetablesbysource-chapter` for a complete explanation
@@ -62,30 +65,3 @@ There also needs to be at least one featured version, which is
 controlled by setting "featured_version" column to "true" for one
 or more rows in the product_version table.
 
-Restart memcached as the *root* user:
-::
-  /etc/init.d/memcached restart
-
-Now the :ref:`ui-chapter` should now work. 
-
-You can change settings using the admin UI, which will be at 
-http://crash-stats/admin (or the equivalent hostname for your install.)
-
-Load data via snapshot
-----------------------
-If you have access to an existing Socorro database snapshot, you can load it like so:
-::
-  # shut down database users
-  sudo /etc/init.d/supervisor force-stop
-  sudo /etc/init.d/apache2 stop
-  
-  # drop old db and load snapshot
-  sudo su - postgres
-  dropdb breakpad
-  createdb -E 'utf8' -l 'en_US.utf8' -T template0 breakpad
-  pg_restore -Fc -d breakpad minidb.dump
-  
-This may take several hours, depending on your hardware. One way to speed this up would be to:
-
-* If in a VirtualBox environment, add more CPU cores to the VM (via virtualbox GUI), default is 1
-* Add "-j n" to pg_restore command above, where n is number of CPU cores - 1
