@@ -31,13 +31,6 @@ Customize CSVs in tools/dataload/, at minimum you probably need to bump the date
 You will probably want to change "WaterWolf" to your own
 product name and version history, if you are setting this up for production.
 
-Also, note that the backfill procedure will ignore build IDs over 30 days old.
-
-After modifying CSV files, use the import script to load the data
-::
-  cd tools/dataload
-  ./import.sh
-
 See :ref:`databasetablesbysource-chapter` for a complete explanation
 of each table.
 
@@ -62,4 +55,9 @@ There also needs to be at least one featured version, which is
 controlled by setting "featured_version" column to "true" for one
 or more rows in the product_version table. The import script will go
 ahead and set all imported versions as featured.
+
+After modifying CSV files, use the import script to load the data
+::
+  cd tools/dataload
+  ./import.sh
 
