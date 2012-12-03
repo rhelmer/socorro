@@ -138,7 +138,7 @@ Download and install CrashStats Web UI
 
 Clone from github
 ::
-  git clone https://github.com/mozilla/socorro
+  git clone https://github.com/mozilla/socorro-crashstats
 
 Read the INSTALL.md for installation instructions.
 
