@@ -109,7 +109,7 @@ By default, Socorro expects a user called "breakpad"
   sudo su - postgres
 
   # create a superuser account for yourself, for configuring postgres
-  createuser -s $YOUR_USERNAME_HERE
+  createuser -s YOUR_USERNAME_HERE
 
   exit
 
