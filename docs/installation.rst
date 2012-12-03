@@ -111,12 +111,6 @@ By default, Socorro expects a user called "breakpad"
   # create a superuser account for yourself, for configuring postgres
   createuser -s $YOUR_USERNAME_HERE
 
-  # socorro will use breakpad_rw, should not be a superuser
-  ##
-  # the default password is "aPassword", if you do not use this you will
-  # need to adjust the Socorro configuration!
-  createuser -W breakpad_rw
-
   exit
 
 Download and install Socorro
