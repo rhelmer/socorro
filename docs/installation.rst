@@ -148,7 +148,7 @@ like to use a stable release, determine latest release tag from our release trac
 
 Run unit/functional tests
 ````````````
-From inside the Socorro checkout, as the *socorro* user:
+From inside the Socorro checkout
 ::
   make test
 
