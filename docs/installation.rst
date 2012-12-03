@@ -68,7 +68,7 @@ Install dependencies
   sudo add-apt-repository ppa:pitti/postgresql
   sudo add-apt-repository ppa:fkrull/deadsnakes
   sudo apt-get update
-  sudo apt-get install build-essential python-software-properties subversion libpq-dev python-virtualenv python-dev postgresql-9.2 postgresql-plperl-9.2 postgresql-contrib-9.2 rsync python2.6
+  sudo apt-get install build-essential python-software-properties subversion libpq-dev python-virtualenv python-dev postgresql-9.2 postgresql-plperl-9.2 postgresql-contrib-9.2 rsync python2.6 python2.6-dev libxslt1-dev
 
 edit /etc/postgresql/9.2/main/postgresql.conf
 ::
