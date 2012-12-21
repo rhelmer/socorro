@@ -79,6 +79,18 @@ echo "INFO: collector received crash ID: $CRASHID"
 retry 'monitor' "$CRASHID"
 retry 'processor' "$CRASHID"
 
-# TODO check that mware has raw crash
-# TODO run backfill
-# TODO check that reports have expected data
+# check that mware has raw crash
+curl -s 'http://localhost:8883/crash/uuid/f4752540-9da9-495a-9b95-93d092121221'  | grep '"total": 1"' > /dev/null
+if [ $? != 0 ]
+then
+  echo "ERROR: middleware test failed"
+  exit 1
+else
+  echo "INFO: middleware passed"
+fi
+
+# run backfill
+psql -c "SELECT backfill_matviews(...)"
+
+# check that reports have expected data
+curl 'http://localhost:8883/crashes/daily/product/WaterWolf/versions/18.0/'
