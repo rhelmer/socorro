@@ -7,101 +7,77 @@
 #
 # This uses the same setup as http://socorro.readthedocs.org/en/latest/installation.html
 
-# set up environment
-make virtualenv
-. socorro-virtualenv/bin/activate
+echo -n "INFO: setting up environment..."
+make virtualenv > setup.log 2>&1
+. socorro-virtualenv/bin/activate >> setup.log 2>&1
 export PYTHONPATH=.
+echo " Done."
 
-# set up database
-python socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dropdb
-pushd tools/dataload
-bash import.sh
-popd
+echo -n "INFO: setting up database..."
+python socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dropdb --force > setupdb.log 2>&1
+pushd tools/dataload >> setupdb.log 2>&1
+bash import.sh >> setupdb.log 2>&1
+popd >> setupdb.log 2>&1
+python socorro/cron/crontabber.py  -j socorro.cron.jobs.weekly_reports_partitions.WeeklyReportsPartitionsCronApp -f >> setupdb.log 2>&1
+echo " Done."
 
-# copy default config
+echo -n "INFO: copying default config..."
 cp config/collector.ini-dist config/collector.ini
 cp config/processor.ini-dist config/processor.ini
 cp config/monitor.ini-dist config/monitor.ini
 cp config/middleware.ini-dist config/middleware.ini
+echo " Done."
 
-# start up collector, processor, monitor and API middleware
+echo -n "INFO: starting up collector, processor, monitor and middleware..."
 for p in collector processor monitor middleware
 do
   # ensure no running processes
-  fuser -k ${p}.log
+  fuser -k ${p}.log > /dev/null 2>&1
   python socorro/${p}/${p}_app.py --admin.conf=./config/${p}.ini > ${p}.log 2>&1 &
   # terminate when this script does
-  trap "kill $!" SIGTERM
+  sleep 5
 done
+echo " Done."
+
+function retry() {
+  name=$1
+  search=$2
+
+  count=0
+  while true
+  do
+    grep "$search" ${name}.log > /dev/null
+    if [ $? != 0 ]
+    then
+      echo "INFO: waiting for $name..."
+      if [ $count == 10 ]
+      then
+        echo "ERROR: $name timeout"
+        exit 1
+      fi
+    else
+      echo "INFO: $name test passed"
+      break
+    fi
+    sleep 5
+    count=$((count+1))
+  done
+  }
 
 # wait for collector to startup
-COUNT=0
-while true
-do
-  grep 'running standalone at 127.0.0.1:8882' collector.log
-  if [ $? != 0 ]
-  then
-    echo "collector not running yet, waiting..."
-    if [ $COUNT == 10 ]
-    then
-      echo "ERROR: timeout"
-      exit 1
-    fi
-  else
-    echo "collector running"
-    break
-  fi
-  sleep 1
-  COUNT=$((COUNT+1))
-done
+retry 'collector' 'running standalone at 127.0.0.1:8882'
 
+echo -n 'INFO: submitting test crash...'
 # submit test crash
 python socorro/collector/submitter_app.py -u http://localhost:8882/submit -s testcrash/ > submitter.log 2>&1
+echo " Done."
 
 CRASHID=`grep 'CrashID' submitter.log | awk -FCrashID=bp- '{print $2}'`
-echo "collector received crash ID: $CRASHID"
+echo "INFO: collector received crash ID: $CRASHID"
 
-# wait for monitor to pick up crash
-COUNT=0
-while true
-do
-  grep $CRASHID monitor.log
-  if [ $? != 0 ]
-  then
-    echo "monitor hasn't picked up crash yet, waiting..."
-    if [ $COUNT == 10 ]
-    then
-      echo "ERROR: timeout"
-      exit 1
-    fi
-  else
-    echo "monitor found crash"
-    break
-  fi
-  sleep 1
-  COUNT=$((COUNT+1))
-done
-
-# wait for processor to pick up crash
-COUNT=0
-while true
-do
-  grep $CRASHID processor.log
-  if [ $? != 0 ]
-  then
-    echo "processor hasn't picked up crash yet, waiting..."
-    if [ $COUNT == 10 ]
-    then
-      echo "ERROR: timeout"
-      exit 1
-    fi
-  else
-    echo "processor found crash"
-    break
-  fi
-  sleep 1
-  COUNT=$((COUNT+1))
-done
+# make sure crashes are picked up
+retry 'monitor' "$CRASHID"
+retry 'processor' "$CRASHID"
 
 # TODO check that mware has raw crash
 # TODO run backfill
