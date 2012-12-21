@@ -34,8 +34,7 @@ do
   # ensure no running processes
   fuser -k ${p}.log > /dev/null 2>&1
   python socorro/${p}/${p}_app.py --admin.conf=./config/${p}.ini > ${p}.log 2>&1 &
-  # terminate when this script does
-  sleep 5
+  sleep 1
 done
 echo " Done."
 
@@ -59,7 +58,7 @@ function retry() {
       echo "INFO: $name test passed"
       break
     fi
-    sleep 5
+    sleep 1
     count=$((count+1))
   done
   }
@@ -89,8 +88,3 @@ else
   echo "INFO: middleware passed"
 fi
 
-# run backfill
-psql -c "SELECT backfill_matviews(...)"
-
-# check that reports have expected data
-curl 'http://localhost:8883/crashes/daily/product/WaterWolf/versions/18.0/'
