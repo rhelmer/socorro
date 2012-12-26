@@ -55,6 +55,12 @@ function retry() {
         exit 1
       fi
     else
+      grep 'ERROR' ${name}.log
+      if [ $? != 1 ]
+      then
+        echo "ERROR: errors found in $name.log"
+        exit 1
+      fi
       echo "INFO: $name test passed"
       break
     fi
