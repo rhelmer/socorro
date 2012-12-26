@@ -83,17 +83,20 @@ echo " Done."
 CRASHID=`grep 'CrashID' submitter.log | awk -FCrashID=bp- '{print $2}'`
 echo "INFO: collector received crash ID: $CRASHID"
 
-# make sure crashes are picked up
+# make sure crashes are picked up, and no errors are logged
+retry 'collector' "$CRASHID"
 retry 'monitor' "$CRASHID"
 retry 'processor' "$CRASHID"
 
 # check that mware has raw crash
-curl -s 'http://localhost:8883/crash/uuid/f4752540-9da9-495a-9b95-93d092121221'  | grep '"total": 1"' > /dev/null
+curl -s "http://localhost:8883/crash/uuid/${CRASHID}"  | grep '"total": 1"' > /dev/null
 if [ $? != 0 ]
 then
-  echo "ERROR: middleware test failed"
+  echo "ERROR: middleware test failed, crash ID $CRASHID not found"
   exit 1
 else
   echo "INFO: middleware passed"
 fi
 
+# check that mware logs the request for the crash, and logs no errors
+retry 'processor' "$CRASHID"
