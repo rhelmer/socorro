@@ -15,6 +15,31 @@ then
   exit 1
 fi
 
+function cleanup() {
+  echo "INFO: Terminating background jobs"
+  
+  for p in collector processor monitor
+  do
+    # destroy any running processes started by this shell
+    kill `jobs -p`
+    # destroy anything trying to write to the log files too
+    fuser -k ${p}.log > /dev/null 2>&1
+  done
+}
+
+trap 'cleanup' INT
+
+function fatal() {
+  exit_code=$1
+  message=$2
+
+  echo "ERROR: $message"
+
+  cleanup
+
+  exit $exit_code
+}
+
 echo -n "INFO: setting up environment..."
 make virtualenv > setup.log 2>&1
 . socorro-virtualenv/bin/activate >> setup.log 2>&1
@@ -62,15 +87,13 @@ function retry() {
       echo "INFO: waiting for $name..."
       if [ $count == 10 ]
       then
-        echo "ERROR: $name timeout"
-        exit 1
+        fatal 1 "$name timeout"
       fi
     else
       grep 'ERROR' ${name}.log
       if [ $? != 1 ]
       then
-        echo "ERROR: errors found in $name.log"
-        exit 1
+        fatal 1 "errors found in $name.log"
       fi
       echo "INFO: $name test passed"
       break
@@ -100,11 +123,12 @@ retry 'processor' "$CRASHID"
 curl -s "http://localhost:8883/crash/uuid/${CRASHID}"  | grep '"total": 1"' > /dev/null
 if [ $? != 0 ]
 then
-  echo "ERROR: middleware test failed, crash ID $CRASHID not found"
-  exit 1
+  fatal 1 "middleware test failed, crash ID $CRASHID not found"
 else
   echo "INFO: middleware passed"
 fi
 
 # check that mware logs the request for the crash, and logs no errors
 retry 'processor' "$CRASHID"
+
+cleanup
