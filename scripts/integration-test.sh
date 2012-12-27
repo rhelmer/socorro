@@ -7,6 +7,14 @@
 #
 # This uses the same setup as http://socorro.readthedocs.org/en/latest/installation.html
 
+if [ "$#" != "1" ] || [ "$1" != "--destroy" ]
+then
+  echo "WARNING - this script will destroy the local socorro install."
+  echo "The default database and config files will be overwritten."
+  echo "You must pass the --destroy flag to continue."
+  exit 1
+fi
+
 echo -n "INFO: setting up environment..."
 make virtualenv > setup.log 2>&1
 . socorro-virtualenv/bin/activate >> setup.log 2>&1
