@@ -14,22 +14,26 @@ import subprocess
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 
-def run(message, commandline, newcwd=None):
+def run(message, commandline, newcwd=None, background=False):
     logging.info('%s...' % message)
     oldcwd = os.getcwd()
     if newcwd:
         os.chdir(newcwd)
-    logging.debug(os.getcwd())
-    subprocess.check_call(commandline)
+    process = None
+    if background:
+        process = subprocess.Popen(commandline, stdout=subprocess.PIPE)
+    else:
+        subprocess.check_call(commandline)
     if newcwd:
         os.chdir(oldcwd)
     logging.info('done')
+    return process
 
-def runpy(message, commandline):
+def runpy(message, commandline, newcwd=None, background=False):
     os.environ['PYTHONPATH'] = '.'
     cmd = ['socorro-virtualenv/bin/python'] + commandline
-    logging.debug(cmd)
-    run(message, ['socorro-virtualenv/bin/python'] + commandline)
+    return run(message, ['socorro-virtualenv/bin/python'] + commandline,
+               newcwd, background)
 
 def main():
     run('setting up environment', ['make', 'virtualenv'])
@@ -44,14 +48,15 @@ def main():
          'scripts/config/createpartitionsconfig.py'])
     runpy('create reports table partitions', ['scripts/createPartitions.py'])
     
-    for process in ['collector', 'processor', 'monitor', 'middleware']:
-        defaultconf = 'config/%s.ini-dist' % process
-        conf = 'config/%s.ini' % process
-        app = 'socorro/%s/%s_app.py' % (process, process)
-        appconf = '--admin.conf=./config/%s.ini' % process
+    for name in ['collector', 'processor', 'monitor', 'middleware']:
+        defaultconf = 'config/%s.ini-dist' % name
+        conf = 'config/%s.ini' % name
+        app = 'socorro/%s/%s_app.py' % (name, name)
+        appconf = '--admin.conf=./config/%s.ini' % name
       
-        run('copying default %s config' % process, ['cp', defaultconf, conf])
-        runpy('starting up %s' % process, [app, appconf])
+        run('copying default %s config' % name, ['cp', defaultconf, conf])
+        process = runpy('starting up %s' % name, [app, appconf],
+                        background=True)
 
 if __name__ == '__main__':
     main()
