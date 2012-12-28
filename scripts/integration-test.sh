@@ -112,6 +112,11 @@ python socorro/collector/submitter_app.py -u http://localhost:8882/submit -s tes
 echo " Done."
 
 CRASHID=`grep 'CrashID' submitter.log | awk -FCrashID=bp- '{print $2}'`
+if [ -z "$CRASHID" ]
+then
+  fatal 1 "no crash ID found in submitter log"
+fi
+
 echo "INFO: collector received crash ID: $CRASHID"
 
 # make sure crashes are picked up, and no errors are logged
