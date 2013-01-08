@@ -51,9 +51,7 @@ python socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dro
 pushd tools/dataload >> setupdb.log 2>&1
 bash import.sh >> setupdb.log 2>&1
 popd >> setupdb.log 2>&1
-# FIXME crontabber should work here
-#python socorro/cron/crontabber.py  -j socorro.cron.jobs.weekly_reports_partitions.WeeklyReportsPartitionsCronApp -f >> setupdb.log 2>&1
-cp scripts/config/createpartitionsconfig.py.dist scripts/config/createpartitionsconfig.py
+python socorro/cron/crontabber.py  --job=weekly-reports-partitions --force >> setupdb.log 2>&1
 python scripts/createPartitions.py >> setupdb.log 2>&1
 echo " Done."
 
