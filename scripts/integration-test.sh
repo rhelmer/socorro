@@ -51,8 +51,7 @@ python socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dro
 pushd tools/dataload >> setupdb.log 2>&1
 bash import.sh >> setupdb.log 2>&1
 popd >> setupdb.log 2>&1
-python socorro/cron/crontabber.py  --job=weekly-reports-partitions --force >> setupdb.log 2>&1
-python scripts/createPartitions.py >> setupdb.log 2>&1
+python socorro/cron/crontabber.py --job=weekly-reports-partitions --force >> setupdb.log 2>&1
 echo " Done."
 
 echo -n "INFO: copying default config..."
