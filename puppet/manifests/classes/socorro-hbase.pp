@@ -46,15 +46,6 @@ class socorro-hbase {
             require => Package['curl'];
     }
 
-    # FIXME add real LZO support, remove hack here
-    exec {
-        "/bin/cat /home/socorro/dev/socorro/analysis/hbase_schema | sed 's/LZO/NONE/g' | /usr/bin/hbase shell":
-            alias => 'hbase-schema',
-            creates => "/var/lib/hbase/crash_reports",
-            logoutput => on_failure,
-            require => Package['hadoop-hbase-master']
-    }
-
     service {
         ['hadoop-hbase-master', 'hadoop-hbase-thrift']:
             require => [Package['hadoop-hbase-master'],
