@@ -21,7 +21,7 @@ def run(message, commandline, newcwd=None, background=False):
         os.chdir(newcwd)
     process = None
     if background:
-        process = subprocess.Popen(commandline, stdout=subprocess.PIPE)
+        process = subprocess.Popen(commandline, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
         subprocess.check_call(commandline)
     if newcwd:
@@ -57,6 +57,11 @@ def main():
         run('copying default %s config' % name, ['cp', defaultconf, conf])
         process = runpy('starting up %s' % name, [app, appconf],
                         background=True)
+        while True:
+            print os.read(process.stdout.fileno, 1)
+
+        print 'killing {}'.format(name)
+        process.kill()
 
 if __name__ == '__main__':
     main()
