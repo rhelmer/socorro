@@ -308,8 +308,7 @@ class BaseTable(object):
     # this should be overridden when fake data is to be generated.
     # it will work for static data as-is.
     def generate_rows(self):
-        for row in self.rows:
-            yield row
+        return iter(self.rows)
 
     def generate_csv(self):
         fname = os.path.abspath('tmp/%s.csv' % self.table)
