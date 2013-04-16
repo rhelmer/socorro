@@ -104,7 +104,7 @@ class BaseTable(object):
                 'crashes_per_hour': '100',
                 'guid': '{waterwolf@example.com}'
             },
-            'Nighttrain': {
+            'NightTrain': {
                 'channels': {
                     'ESR': {
                         'versions': [{
