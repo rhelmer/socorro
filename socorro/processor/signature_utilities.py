@@ -61,7 +61,7 @@ class CSignatureTool(SignatureTool):
       'irrelevant_signature_re',
       doc='a regular expression matching frame signatures that should be '
           'ignored when generating an overall signature',
-      default='|'.join([
+      default="""'|'.join([
           '@0x[0-9a-fA-F]{2,}',
           '@0x[1-9a-fA-F]',
           'ashmem',
@@ -107,28 +107,21 @@ class CSignatureTool(SignatureTool):
           'RealMsgWaitFor.*'
           '_ZdlPv',
           'zero',
-          ])
+          ])""",
+      from_string_converter=eval
     )
     required_config.add_option(
       'prefix_signature_re',
       doc='a regular expression matching frame signatures that should always '
           'be coupled with the following frame signature when generating an '
           'overall signature',
-      default='|'.join([
+      default="""'|'.join([
           '@0x0',
+          'Abort',
           '.*abort',
           '_alloca_probe.*',
           '__android_log_assert',
-          'arena_alloc',
-          'arena_dalloc',
-          'arena_dalloc_small',
-          'arena_malloc',
-          'arena_malloc_small',
-          'arena_ralloc',
-          'arena_run_dalloc',
-          'arena_run_reg_alloc',
-          'arena_run_reg_dalloc',
-          'arena_run_tree_insert',
+          'arena_.*',
           'BaseGetNamedObjectDirectory',
           '.*calloc',
           'cert_.*',
@@ -141,6 +134,7 @@ class CSignatureTool(SignatureTool):
           'dlmalloc_trim',
           'dvm.*',
           'EtwEventEnabled',
+          'extent_.*',
           'fastcopy_I',
           'fastzero_I',
           '_files_getaddrinfo',
@@ -152,6 +146,7 @@ class CSignatureTool(SignatureTool):
           'init_library',
           'isalloc',
           'je_malloc',
+          'jemalloc_crash',
           'je_realloc',
           'JNI_CreateJavaVM',
           '_JNIEnv.*',
@@ -180,11 +175,14 @@ class CSignatureTool(SignatureTool):
           'mozilla::ipc::RPCChannel::Send',
           'moz_xmalloc',
           'moz_xrealloc',
+          'NP_Shutdown',
           'nsCOMPtr.*',
-          'NS_DebugBreak_P.*',
+          'NS_DebugBreak.*',
           '[-+]\[NSException raise(:format:(arguments:)?)?\]',
           'nsObjCExceptionLogAbort(\(.*?\)){0,1}',
           'nsRefPtr.*',
+          'NSS.*',
+          'nss.*',
           'nsTArray<.*',
           'nsTArray_base<.*',
           'NtUser.*',
@@ -208,6 +206,7 @@ class CSignatureTool(SignatureTool):
           'SEC_.*Item',
           'seckey_.*',
           'SECKEY_.*',
+          '__security_check_cookie',
           'send',
           'setjmp',
           'sigblock',
@@ -253,7 +252,10 @@ class CSignatureTool(SignatureTool):
           'WSARecv.*',
           'WSASend.*',
           '_ZdaPvRKSt9nothrow_t\"',
-    ]))
+          'zzz_AsmCodeRange_.*',
+        ])""",
+      from_string_converter=eval
+    )
     required_config.add_option(
       'signatures_with_line_numbers_re',
       doc='any signatures that match this list should be combined with their '

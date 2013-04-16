@@ -73,6 +73,7 @@ class PostgreSQLBase(object):
             if not connection:
                 connection = self.database.connection()
                 fresh_connection = True
+            # self.context.logger.debug(connection.cursor.mogrify(sql, params))
             results = execute_query_fetchall(connection, sql, params)
         except psycopg2.Error:
             if error_message is None:
@@ -104,6 +105,7 @@ class PostgreSQLBase(object):
             if not connection:
                 connection = self.database.connection()
                 fresh_connection = True
+            # self.context.logger.debug(connection.cursor.mogrify(sql, params))
             result = single_value_sql(connection, sql, params)
         except psycopg2.Error:
             if error_message is None:
@@ -256,6 +258,19 @@ class PostgreSQLBase(object):
             sql_where.append("(%s)" % (" OR ".join(reasons_list)))
             sql_params = add_param_to_dict(sql_params, "reason",
                                            params["reasons"])
+
+        ## Adding release channels to where clause
+        if params["release_channels"]:
+            channels_list = [
+                "UPPER(r.release_channel)=UPPER(%%(release_channel%s)s)" % x
+                for x in range(len(params["release_channels"]))
+            ]
+            sql_where.append("(%s)" % " OR ".join(channels_list))
+            sql_params = add_param_to_dict(
+                sql_params,
+                "release_channel",
+                params["release_channels"]
+            )
 
         ## Adding report type to where clause
         if params["report_type"] == "crash":

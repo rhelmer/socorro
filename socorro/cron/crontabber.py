@@ -24,30 +24,31 @@ from socorro.lib.datetimeutil import utc_now, UTC
 from socorro.cron.base import (
     convert_frequency,
     FrequencyDefinitionError,
-    BaseBackfillCronApp
+    BaseBackfillCronApp,
+    reorder_dag
 )
 
 
 DEFAULT_JOBS = '''
-    socorro.cron.jobs.weekly_reports_partitions.WeeklyReportsPartitionsCronApp|7d
-    socorro.cron.jobs.matviews.ProductVersionsCronApp|1d|10:00
-    socorro.cron.jobs.matviews.SignaturesCronApp|1d|10:00
-    socorro.cron.jobs.matviews.TCBSCronApp|1d|10:00
-    socorro.cron.jobs.matviews.ADUCronApp|1d|10:00
-    socorro.cron.jobs.matviews.NightlyBuildsCronApp|1d|10:00
-    socorro.cron.jobs.matviews.DuplicatesCronApp|1h
-    socorro.cron.jobs.matviews.ReportsCleanCronApp|1h
-    socorro.cron.jobs.bugzilla.BugzillaCronApp|1h
-    socorro.cron.jobs.matviews.BuildADUCronApp|1d|10:00
-    socorro.cron.jobs.matviews.CrashesByUserCronApp|1d|10:00
-    socorro.cron.jobs.matviews.CrashesByUserBuildCronApp|1d|10:00
-    socorro.cron.jobs.matviews.CorrelationsCronApp|1d|10:00
-    socorro.cron.jobs.matviews.HomePageGraphCronApp|1d|10:00
-    socorro.cron.jobs.matviews.HomePageGraphBuildCronApp|1d|10:00
-    socorro.cron.jobs.matviews.TCBSBuildCronApp|1d|10:00
-    socorro.cron.jobs.matviews.ExplosivenessCronApp|1d|10:00
-    socorro.cron.jobs.ftpscraper.FTPScraperCronApp|1h
-    socorro.cron.jobs.automatic_emails.AutomaticEmailsCronApp|1h
+  socorro.cron.jobs.weekly_reports_partitions.WeeklyReportsPartitionsCronApp|7d
+  socorro.cron.jobs.matviews.ProductVersionsCronApp|1d|10:00
+  socorro.cron.jobs.matviews.SignaturesCronApp|1d|10:00
+  socorro.cron.jobs.matviews.TCBSCronApp|1d|10:00
+  socorro.cron.jobs.matviews.ADUCronApp|1d|10:00
+  socorro.cron.jobs.matviews.NightlyBuildsCronApp|1d|10:00
+  socorro.cron.jobs.matviews.DuplicatesCronApp|1h
+  socorro.cron.jobs.matviews.ReportsCleanCronApp|1h
+  socorro.cron.jobs.bugzilla.BugzillaCronApp|1h
+  socorro.cron.jobs.matviews.BuildADUCronApp|1d|10:00
+  socorro.cron.jobs.matviews.CrashesByUserCronApp|1d|10:00
+  socorro.cron.jobs.matviews.CrashesByUserBuildCronApp|1d|10:00
+  socorro.cron.jobs.matviews.CorrelationsCronApp|1d|10:00
+  socorro.cron.jobs.matviews.HomePageGraphCronApp|1d|10:00
+  socorro.cron.jobs.matviews.HomePageGraphBuildCronApp|1d|10:00
+  socorro.cron.jobs.matviews.TCBSBuildCronApp|1d|10:00
+  socorro.cron.jobs.matviews.ExplosivenessCronApp|1d|10:00
+  socorro.cron.jobs.ftpscraper.FTPScraperCronApp|1h
+  socorro.cron.jobs.automatic_emails.AutomaticEmailsCronApp|1h
 '''
 
 
@@ -427,6 +428,12 @@ class CronTabber(App):
         )
     )
 
+    required_config.crontabber.add_option(
+        'error_retry_time',
+        default=300,
+        doc='number of seconds to re-attempt a job that failed'
+    )
+
     required_config.namespace('database')
     required_config.database.add_option(
         'database_class',
@@ -510,6 +517,18 @@ class CronTabber(App):
             self.run_all()
         return 0
 
+    @staticmethod
+    def _reorder_class_list(class_list):
+        # class_list looks something like this:
+        # [('FooBarJob', <class 'FooBarJob'>),
+        #  ('BarJob', <class 'BarJob'>),
+        #  ('FooJob', <class 'FooJob'>)]
+        return reorder_dag(
+            class_list,
+            depends_getter=lambda x: getattr(x[1], 'depends_on', None),
+            name_getter=lambda x: x[1].app_name
+        )
+
     @property
     def database(self):
         if not getattr(self, '_database', None):
@@ -554,19 +573,16 @@ class CronTabber(App):
 
         if criticals:
             stream.write('CRITICAL - ')
-            for each in criticals:
-                stream.write(each)
-                stream.write('\n')
-        elif warnings:
-            stream.write('WARNING - ')
-            for each in warnings:
-                stream.write(each)
-                stream.write('\n')
-
-        if criticals:
+            stream.write('; '.join(criticals))
+            stream.write('\n')
             return 2
         elif warnings:
+            stream.write('WARNING - ')
+            stream.write('; '.join(warnings))
+            stream.write('\n')
             return 1
+        stream.write('OK - All systems nominal')
+        stream.write('\n')
         return 0
 
     def list_jobs(self, stream=None):
@@ -621,7 +637,9 @@ class CronTabber(App):
         """remove the job from the state.
         if means that next time we run, this job will start over from scratch.
         """
-        for class_name, job_class in self.config.crontabber.jobs.class_list:
+        class_list = self.config.crontabber.jobs.class_list
+        class_list = self._reorder_class_list(class_list)
+        for class_name, job_class in class_list:
             if (
                 job_class.app_name == description or
                 description == job_class.__module__ + '.' + job_class.__name__
@@ -636,14 +654,18 @@ class CronTabber(App):
         raise JobNotFoundError(description)
 
     def run_all(self):
-        for class_name, job_class in self.config.crontabber.jobs.class_list:
+        class_list = self.config.crontabber.jobs.class_list
+        class_list = self._reorder_class_list(class_list)
+        for class_name, job_class in class_list:
             class_config = self.config.crontabber['class-%s' % class_name]
             self._run_one(job_class, class_config)
 
     def run_one(self, description, force=False):
         # the description in this case is either the app_name or the full
         # module/class reference
-        for class_name, job_class in self.config.crontabber.jobs.class_list:
+        class_list = self.config.crontabber.jobs.class_list
+        class_list = self._reorder_class_list(class_list)
+        for class_name, job_class in class_list:
             if (
                 job_class.app_name == description or
                 description == job_class.__module__ + '.' + job_class.__name__
@@ -762,15 +784,21 @@ class CronTabber(App):
         if 'first_run' not in info:
             info['first_run'] = now
         info['last_run'] = now
-        info['next_run'] = now + datetime.timedelta(seconds=seconds)
         if last_success:
             info['last_success'] = last_success
-        if time_:
-            h, m = [int(x) for x in time_.split(':')]
-            info['next_run'] = info['next_run'].replace(hour=h,
-                                                        minute=m,
-                                                        second=0,
-                                                        microsecond=0)
+        if exc_type:
+            # it errored, try very soon again
+            info['next_run'] = now + datetime.timedelta(
+                seconds=self.config.crontabber.error_retry_time
+            )
+        else:
+            info['next_run'] = now + datetime.timedelta(seconds=seconds)
+            if time_:
+                h, m = [int(x) for x in time_.split(':')]
+                info['next_run'] = info['next_run'].replace(hour=h,
+                                                            minute=m,
+                                                            second=0,
+                                                            microsecond=0)
 
         if exc_type:
             tb = ''.join(traceback.format_tb(exc_tb))
@@ -791,7 +819,10 @@ class CronTabber(App):
         """return true if all configured jobs are configured OK"""
         # similar to run_all() but don't actually run them
         failed = 0
-        for class_name, __ in self.config.crontabber.jobs.class_list:
+
+        class_list = self.config.crontabber.jobs.class_list
+        class_list = self._reorder_class_list(class_list)
+        for class_name, __ in class_list:
             class_config = self.config.crontabber['class-%s' % class_name]
             if not self._configtest_one(class_config):
                 failed += 1

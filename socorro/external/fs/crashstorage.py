@@ -169,8 +169,9 @@ class FSRadixTreeStorage(CrashStorageBase):
                 os.makedirs(parent_dir)
             except OSError:
                 # probably already created, ignore
-                self.logger.info("could not make directory: %s" %
-                    self.config.fs_root)
+                pass
+                #self.logger.debug("could not make directory: %s" %
+                    #self.config.fs_root)
 
             for fn, contents in files.iteritems():
                 with open(os.sep.join([parent_dir, fn]), 'wb') as f:
@@ -392,8 +393,9 @@ class FSDatedRadixTreeStorage(FSRadixTreeStorage):
             os.makedirs(parent_dir)
         except OSError:
             # probably already created, ignore
-            self.logger.info("could not make directory: %s" %
-                parent_dir)
+            pass
+            #self.logger.debug("could not make directory: %s" %
+                #parent_dir)
 
         with using_umask(self.config.umask):
             self._create_name_to_date_symlink(crash_id, slot)
@@ -470,7 +472,9 @@ class FSDatedRadixTreeStorage(FSRadixTreeStorage):
             try:
                 hour_slots = os.listdir(dated_base)
             except OSError:
-                self.logger.info("date root for %s doesn't exist" % date)
+                # it is okay that the date root doesn't exist - skip on to
+                # the next date
+                #self.logger.info("date root for %s doesn't exist" % date)
                 continue
 
             for hour_slot in hour_slots:

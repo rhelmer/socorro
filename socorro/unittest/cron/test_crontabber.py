@@ -8,6 +8,8 @@ import datetime
 import os
 import json
 import time
+import unittest
+import collections
 from cStringIO import StringIO
 import mock
 import psycopg2
@@ -18,6 +20,108 @@ from socorro.cron import base
 from socorro.lib.datetimeutil import utc_now, UTC
 from configman import Namespace
 from .base import DSN, TestCaseBase
+
+
+#==============================================================================
+class _Item(object):
+
+    def __init__(self, name, depends_on):
+        self.app_name = name
+        self.depends_on = depends_on
+
+
+class TestReordering(unittest.TestCase):
+
+    def test_basic_already_right(self):
+        sequence = [
+            _Item('A', []),
+            _Item('B', ['A']),
+            _Item('C', ['B']),
+        ]
+        new_sequence = base.reorder_dag(sequence)
+        new_names = [x.app_name for x in new_sequence]
+        self.assertEqual(new_names, ['A', 'B', 'C'])
+
+    def test_three_levels(self):
+        sequence = [
+            _Item('A', []),
+            _Item('B', ['A']),
+            _Item('D', ['B', 'C']),
+            _Item('C', ['B']),
+
+        ]
+        new_sequence = base.reorder_dag(sequence)
+        new_names = [x.app_name for x in new_sequence]
+        self.assertEqual(new_names, ['A', 'B', 'C', 'D'])
+
+    def test_basic_completely_reversed(self):
+        sequence = [
+            _Item('C', ['B']),
+            _Item('B', ['A']),
+            _Item('A', []),
+        ]
+        new_sequence = base.reorder_dag(sequence)
+        new_names = [x.app_name for x in new_sequence]
+        self.assertEqual(new_names, ['A', 'B', 'C'])
+
+    def test_basic_sloppy_depends_on(self):
+        sequence = [
+            _Item('C', ('B',)),
+            _Item('B', 'A'),
+            _Item('A', None),
+        ]
+        new_sequence = base.reorder_dag(sequence)
+        new_names = [x.app_name for x in new_sequence]
+        self.assertEqual(new_names, ['A', 'B', 'C'])
+
+    def test_two_trees(self):
+        sequence = [
+            _Item('C', ['B']),
+            _Item('B', ['A']),
+            _Item('A', []),
+            _Item('X', ['Y']),
+            _Item('Y', []),
+        ]
+        new_sequence = base.reorder_dag(sequence)
+        new_names = [x.app_name for x in new_sequence]
+        self.assertTrue(
+            new_names.index('A')
+            <
+            new_names.index('B')
+            <
+            new_names.index('C')
+        )
+        self.assertTrue(
+            new_names.index('Y')
+            <
+            new_names.index('X')
+        )
+
+    def test_circular_no_roots(self):
+        sequence = [
+            _Item('C', ['B']),
+            _Item('B', ['A']),
+            _Item('A', ['C']),
+        ]
+        self.assertRaises(
+            base.CircularDAGError,
+            base.reorder_dag,
+            sequence
+        )
+
+    def test_circular_one_root_still_circular(self):
+        sequence = [
+            _Item('C', ['B']),
+            _Item('X', ['Y']),
+            _Item('Y', []),
+            _Item('B', ['A']),
+            _Item('A', ['C']),
+        ]
+        self.assertRaises(
+            base.CircularDAGError,
+            base.reorder_dag,
+            sequence
+        )
 
 
 #==============================================================================
@@ -278,7 +382,10 @@ class TestCrontabber(TestCaseBase):
 
     def test_run_into_error_first_time(self):
         config_manager, json_file = self._setup_config_manager(
-            'socorro.unittest.cron.test_crontabber.TroubleJob|7d\n'
+            'socorro.unittest.cron.test_crontabber.TroubleJob|7d\n',
+            extra_value_source={
+                'crontabber.error_retry_time': '100'
+            }
         )
 
         with config_manager.context() as config:
@@ -293,12 +400,12 @@ class TestCrontabber(TestCaseBase):
             self.assertTrue(information['last_error'])
             self.assertTrue(not information.get('last_success'), {})
             today = utc_now()
-            one_week = today + datetime.timedelta(days=7)
             self.assertTrue(today.strftime('%Y-%m-%d')
                             in information['last_run'])
             self.assertTrue(today.strftime('%H:%M')
                             in information['last_run'])
-            self.assertTrue(one_week.strftime('%Y-%m-%d')
+            _next_run = utc_now() + datetime.timedelta(seconds=100)
+            self.assertTrue(_next_run.strftime('%Y-%m-%d %H:%M')
                             in information['next_run'])
 
             # list the output
@@ -319,7 +426,8 @@ class TestCrontabber(TestCaseBase):
         config_manager, json_file = self._setup_config_manager(
             'socorro.unittest.cron.test_crontabber.TroubleJob|1d\n'
             'socorro.unittest.cron.test_crontabber.SadJob|1d\n'
-            'socorro.unittest.cron.test_crontabber.BasicJob|1d'
+            'socorro.unittest.cron.test_crontabber.BasicJob|1d\n'
+            'socorro.unittest.cron.test_crontabber.FooJob|1d'
         )
 
         with config_manager.context() as config:
@@ -328,7 +436,10 @@ class TestCrontabber(TestCaseBase):
 
             infos = [x[0][0] for x in config.logger.info.call_args_list]
             infos = [x for x in infos if x.startswith('Ran ')]
-            self.assertEqual(infos, ['Ran TroubleJob', 'Ran BasicJob'])
+            self.assertEqual(
+                infos,
+                ['Ran BasicJob', 'Ran TroubleJob', 'Ran FooJob']
+            )
             # note how SadJob couldn't be run!
             # let's see what information we have
             assert os.path.isfile(json_file)
@@ -366,11 +477,10 @@ class TestCrontabber(TestCaseBase):
         # hasn't never run
         with config_manager.context() as config:
             tab = crontabber.CronTabber(config)
-            tab.run_all()
-
-            infos = [x[0][0] for x in config.logger.info.call_args_list]
-            infos = [x for x in infos if x.startswith('Ran ')]
-            self.assertEqual(infos, [])
+            self.assertRaises(
+                base.CircularDAGError,
+                tab.run_all
+            )
 
     def test_run_all_with_failing_dependency_without_errors_but_old(self):
         config_manager, json_file = self._setup_config_manager(
@@ -1313,7 +1423,7 @@ class TestCrontabber(TestCaseBase):
             stream = StringIO()
             exit_code = tab.nagios(stream=stream)
             self.assertEqual(exit_code, 0)
-            self.assertEqual(stream.getvalue(), '')
+            self.assertEqual(stream.getvalue(), 'OK - All systems nominal\n')
 
     def test_nagios_warning(self):
         config_manager, json_file = self._setup_config_manager(
@@ -1368,6 +1478,166 @@ class TestCrontabber(TestCaseBase):
             self.assertTrue('TroubleJob' in output)
             self.assertTrue('NameError' in output)
             self.assertTrue('Trouble!!' in output)
+
+    def test_nagios_multiple_messages(self):
+        config_manager, json_file = self._setup_config_manager(
+            'socorro.unittest.cron.test_crontabber.TroubleJob|1d\n'
+            'socorro.unittest.cron.test_crontabber.MoreTroubleJob|1d'
+        )
+        with config_manager.context() as config:
+            tab = crontabber.CronTabber(config)
+            tab.run_all()
+            stream = StringIO()
+            exit_code = tab.nagios(stream=stream)
+            self.assertEqual(exit_code, 2)
+            output = stream.getvalue()
+            self.assertEqual(len(output.strip().splitlines()), 1)
+            self.assertEqual(output.count('CRITICAL'), 1)
+            self.assertTrue('trouble' in output)
+            self.assertTrue('more-trouble' in output)
+            self.assertTrue('TroubleJob' in output)
+            self.assertTrue('MoreTroubleJob' in output)
+            self.assertTrue('NameError' in output)
+            self.assertTrue('Trouble!!' in output)
+
+    def test_reorder_dag_on_joblist(self):
+        config_manager, json_file = self._setup_config_manager(
+            'socorro.unittest.cron.test_crontabber.FooBarJob|1d\n'
+            'socorro.unittest.cron.test_crontabber.BarJob|1d\n'
+            'socorro.unittest.cron.test_crontabber.FooJob|1d'
+        )
+        # looking at the dependencies, since FooJob doesn't depend on anything
+        # it should be run first, then BarJob and lastly FooBarJob because
+        # FooBarJob depends on FooJob and BarJob.
+        with config_manager.context() as config:
+            tab = crontabber.CronTabber(config)
+            tab.run_all()
+            structure = json.load(open(json_file))
+            self.assertTrue('foo' in structure)
+            self.assertTrue('bar' in structure)
+            self.assertTrue('foobar' in structure)
+            self.assertTrue(
+                structure['foo']['last_run']
+                <
+                structure['bar']['last_run']
+                <
+                structure['foobar']['last_run']
+            )
+
+    def test_retry_errors_sooner(self):
+        """
+        FooBarBackfillJob depends on FooBackfillJob and BarBackfillJob
+        BarBackfillJob depends on FooBackfillJob
+        FooBackfillJob doesn't depend on anything
+        We'll want to pretend that BarBackfillJob (second to run)
+        fails and notice that FooBarBackfillJob won't run.
+        Then we wind the clock forward 5 minutes and run all again,
+        this time, the FooBackfillJob shouldn't need to run but
+        BarBackfillJob and FooBackfillJob should both run twice
+        """
+        config_manager, json_file = self._setup_config_manager(
+            'socorro.unittest.cron.test_crontabber.BarBackfillJob|1d\n'
+            'socorro.unittest.cron.test_crontabber.FooBackfillJob|1d\n'
+            'socorro.unittest.cron.test_crontabber.FooBarBackfillJob|1d',
+            extra_value_source={
+                # crontabber already has a good default for this but by
+                # being explict like this we not only show that it can be
+                # changed, we also make it clear what the unit test is
+                # supposed to do.
+                'crontabber.error_retry_time': '3600'  # 1 hour
+            }
+        )
+
+        # first we need to hack-about so that BarBackfillJob fails only
+        # once.
+
+        class SomeError(Exception):
+            pass
+
+        def nosy_run(self, date):
+            dates_used[self.__class__].append(date)
+            if self.__class__ == BarBackfillJob:
+                if len(dates_used[self.__class__]) == 1:
+                    # first time run, simulate trouble
+                    raise SomeError("something went wrong")
+            return originals[self.__class__](self, date)
+
+        classes = BarBackfillJob, FooBackfillJob, FooBarBackfillJob
+        originals = {}
+        dates_used = collections.defaultdict(list)
+        for klass in classes:
+            originals[klass] = klass.run
+            klass.run = nosy_run
+
+        try:
+            with config_manager.context() as config:
+                tab = crontabber.CronTabber(config)
+                tab.run_all()
+                self.assertEqual(len(dates_used[FooBackfillJob]), 1)
+                self.assertEqual(len(dates_used[FooBackfillJob]), 1)
+                # never gets there because dependency fails
+                self.assertEqual(len(dates_used[FooBarBackfillJob]), 0)
+
+                structure = json.load(open(json_file))
+                assert structure['foo-backfill']
+                assert not structure['foo-backfill']['last_error']
+                next_date = utc_now() + datetime.timedelta(days=1)
+                assert (
+                    next_date.strftime('%Y-%m-%d %H:%M') in
+                    structure['foo-backfill']['next_run']
+                )
+
+                assert structure['bar-backfill']
+                assert structure['bar-backfill']['last_error']
+                next_date = utc_now() + datetime.timedelta(hours=1)
+                assert (
+                    next_date.strftime('%Y-%m-%d %H:%M') in
+                    structure['bar-backfill']['next_run']
+                )
+
+                assert 'foobar-backfill' not in structure
+
+                # Now, let the magic happen, we pretend time passes by 2 hours
+                # and run all jobs again
+                self._wind_clock(json_file, hours=2)
+                # this forces in crontabber instance to reload the JSON file
+                tab._database = None
+
+                # here, we go two hours later
+                tab.run_all()
+
+                # Here's the magic sauce! The FooBarBackfillJob had to wait
+                # two hours to run after FooBackfillJob but it should
+                # have been given the same date input as when FooBackfillJob
+                # ran.
+                self.assertEqual(len(dates_used[FooBackfillJob]), 1)
+                self.assertEqual(len(dates_used[FooBackfillJob]), 1)
+                self.assertEqual(len(dates_used[FooBarBackfillJob]), 1)
+
+                # use this formatter so that we don't have to compare
+                # datetimes with microseconds
+                format = lambda x: x.strftime('%Y%m%d %H:%M %Z')
+                self.assertEqual(
+                    format(dates_used[FooBackfillJob][0]),
+                    format(dates_used[FooBarBackfillJob][0])
+                )
+                # also check the others
+                self.assertEqual(
+                    format(dates_used[BarBackfillJob][0]),
+                    format(dates_used[FooBarBackfillJob][0])
+                )
+
+                structure = json.load(open(json_file))
+                self.assertTrue(structure['foo-backfill'])
+                self.assertTrue(not structure['foo-backfill']['last_error'])
+                self.assertTrue(structure['bar-backfill'])
+                self.assertTrue(not structure['bar-backfill']['last_error'])
+                self.assertTrue(structure['foobar-backfill'])
+                self.assertTrue(not structure['foobar-backfill']['last_error'])
+
+        finally:
+            for klass in classes:
+                klass.run = originals[klass]
 
 
 #==============================================================================
@@ -1664,6 +1934,10 @@ class TroubleJob(_Job):
         raise NameError("Trouble!!")
 
 
+class MoreTroubleJob(TroubleJob):
+    app_name = 'more-trouble'
+
+
 class SadJob(_Job):
     app_name = 'sad'
     depends_on = 'trouble',  # <-- note: a tuple
@@ -1726,6 +2000,16 @@ class _BackfillJob(base.BaseBackfillCronApp):
 
 class FooBackfillJob(_BackfillJob):
     app_name = 'foo-backfill'
+
+
+class BarBackfillJob(_BackfillJob):
+    app_name = 'bar-backfill'
+    depends_on = 'foo-backfill'
+
+
+class FooBarBackfillJob(_BackfillJob):
+    app_name = 'foobar-backfill'
+    depends_on = ('foo-backfill', 'bar-backfill')
 
 
 class BackfillbasedTrouble(_BackfillJob):

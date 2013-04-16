@@ -140,7 +140,7 @@ class IntegrationTestSearch(PostgreSQLTestCase):
                 'Linux',
                 null,
                 'plugin',
-                'Release'
+                'Nightly'
             ),
             (
                 8,
@@ -168,7 +168,7 @@ class IntegrationTestSearch(PostgreSQLTestCase):
                 'Linux',
                 null,
                 'browser',
-                'Release'
+                'Nightly'
             ),
             (
                 10,
@@ -401,3 +401,22 @@ class IntegrationTestSearch(PostgreSQLTestCase):
         res = search.get(**params)
         self.assertEqual(res['total'], 2)
         self.assertEqual(res, res_expected)
+
+        # Test 9: release channels
+        params = {
+            'release_channels': ['Nightly']
+        }
+        res = search.get(**params)
+        self.assertEqual(res['total'], 2)
+
+        hits = res['hits'][0]
+        self.assertEqual(hits['signature'], 'js::functions::call::hello_world')
+        hits = res['hits'][1]
+        self.assertEqual(hits['signature'], 'sig2')
+
+        # verify that several values work, verify that it's case insensitive
+        params = {
+            'release_channels': ['NiGhTlY', 'release']
+        }
+        res = search.get(**params)
+        self.assertEqual(res['total'], 5)
