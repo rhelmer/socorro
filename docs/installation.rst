@@ -165,8 +165,31 @@ This is the binary which processes breakpad crash dumps into stack traces:
 
 Populate PostgreSQL Database
 ````````````
+Load the Socorro schema
+-------------------
+
+Set up environment
+::
+  make virtualenv
+  . socorro-virtualenv/bin/activate
+  export PYTHONPATH=.
+
+Load the Socorro schema
+::
+  ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad
+
+IMPORTANT NOTE - many reports use the reports_clean_done() stored
+procedure to check that reports exist for the last UTC hour of the
+day being processed, as a way to catch problems. If your crash
+volume does not guarantee one crash per hour, you may want to modify
+this function in socorro/external/postgresql/raw_sql/procs/reports_clean_done.sql
+and reload the schema
+::
+
+  ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dropdb
+
 Refer to :ref:`populatepostgres-chapter` for information about
-loading the schema and populating the database.
+populating the database.
 
 This step is *required* to get basic information about existing product names
 and versions into the system.

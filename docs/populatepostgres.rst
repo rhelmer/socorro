@@ -2,20 +2,11 @@
 
 .. _populatepostgres-chapter:
 
-Populate PostgreSQL for the first time
-======================================
+Populate PostgreSQL
+===================
 
-Socorro supports multiple products, each of which may contain multiple versions.
-
-* A product is a global product name, such as Firefox, Thunderbird, Fennec, etc.
-* A version is a revision of a particular product, such as Firefox 3.6.6 or Firefox 3.6.5
-* A branch is the indicator for the Gecko platform used in a Mozilla product / version. If your crash reporting project does not have a need for branch support, just enter “1.0” as the branch number for your product / version.
-
-Customize CSV files
+Load the Socorro schema
 -------------------
-
-Socorro comes with a set of CSV files you can customize and use to bootstrap
-your database.
 
 Set up environment
 ::
@@ -26,6 +17,21 @@ Set up environment
 Load the Socorro schema
 ::
   ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad
+
+IMPORTANT NOTE - many reports use the reports_clean_done() stored
+procedure to check that reports exist for the last UTC hour of the
+day being processed, as a way to catch problems. If your crash
+volume does not guarantee one crash per hour, you may want to modify
+this function in socorro/external/postgresql/raw_sql/procs/reports_clean_done.sql
+and reload the schema
+::
+
+  ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dropdb
+
+Initially your Socorro install will be empty and not very interesting, because
+reports are generated once per day for the previous UTC day. However, you can
+easily generate data for testing purposes, and could use this as a starting 
+point
 
 Customize CSVs in tools/dataload/, at minimum you probably need to bump the dates and build IDs in
 ::
@@ -42,29 +48,10 @@ Run backfill function to populate matviews
 Socorro depends upon materialized views which run nightly, to display
 graphs and show reports such as "Top Crash By Signature".
 
-IMPORTANT NOTE - many reports use the reports_clean_done() stored
-procedure to check that reports exist for the last UTC hour of the
-day being processed, as a way to catch problems. If your crash
-volume does not guarantee one crash per hour, you may want to modify
-this function in socorro/external/postgresql/raw_sql/procs/reports_clean_done.sql
-and reload the schema
-::
-
-  ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dropdb
-
 ALSO - the backfill procedure ignores any data over 30 days old.
 Make sure you've adjusted the dates in the CSV files appropriately,
 or change these functions in socorro/external/postgresql/raw_sql/procs/backfill_*.sql
 and reload the schema as above.
-
-Normally this is run for the previous day by cron_daily_matviews.sh
-but you can run the following function to bootstrap the system
-::
-
-    psql breakpad -c "SELECT backfill_matviews()"
-
-This is normally run by the import.sh, so take a look in there if
-you need to make adjustments.
 
 There also needs to be at least one featured version, which is
 controlled by setting "featured_version" column to "true" for one
@@ -74,3 +61,9 @@ ahead and set all imported versions as featured.
 After modifying CSV files, use the import script to load the data
 ::
   ./tools/dataload/import.sh
+
+If you ever need to manually backfill for some reason (e.g. incoming data
+was held up or needed to be reprocessed), you 
+::
+    -- backfill from 2013-01-01 to 2013-01-05 inclusive 
+    psql breakpad -c "SELECT backfill_matviews('2013-01-01', '2013-01-05')"
