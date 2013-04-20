@@ -82,7 +82,7 @@ class socorro-db inherits socorro-base {
             alias => 'make-fakedata',
             cwd => '/home/socorro/dev/socorro',
             creates => '/home/socorro/dev/socorro/tmp/import.sql',
-            require => Exec['create-breakpad-db'];
+            require => Exec['create-breakpad-db'],
             logoutput => on_failure,
             user => 'socorro';
     }
