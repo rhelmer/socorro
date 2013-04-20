@@ -621,8 +621,8 @@ class ReleaseRepositories(BaseTable):
 
 class CrontabberState(BaseTable):
     table = 'crontabber_state'
-    columns = ['state', 'last_updated']
-    rows = [['{}', '2012-05-16 00:00:00']]
+    columns = ['last_updated', 'state']
+    rows = [['2012-05-16 00:00:00', '{}']]
 
 class CrashTypes(BaseTable):
     table = 'crash_types'
