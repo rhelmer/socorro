@@ -97,4 +97,4 @@ analysis:
 	rsync -a socorro-toolbox/src/main/pig/ analysis/
 
 fakedata:
-	PYTHONPATH=$(PYTHONPATH) $(PYTHON) ./socorro/external/postgresql/fakedata.py > tools/import.sql
+	PYTHONPATH=$(PYTHONPATH) $(PYTHON) ./socorro/external/postgresql/fakedata.py > tmp/import.sql
