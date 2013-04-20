@@ -163,6 +163,24 @@ This is the binary which processes breakpad crash dumps into stack traces:
 ::
   make minidump_stackwalk
 
+Setting up environment
+````````````
+To run and hack on Socorro apps, you will need:
+
+1) all dependencies installed from requirements/{prod,dev}.txt
+1.1) also requirements/dev.txt, if you are doing development
+2) set PYTHONPATH to .
+
+Socorro can install the dependencies into a virtualenv for you, then
+just activate it and set your PYTHONPATH
+::
+  make virtualenv
+  . socorro-virtualenv/bin/activate
+  export PYTHONPATH=.
+
+Or you can choose to manage the virtualenv yourself, perhaps using
+virtualenwrapper or similar.
+
 Populate PostgreSQL Database
 ````````````
 Load the Socorro schema
@@ -182,17 +200,14 @@ IMPORTANT NOTE - many reports use the reports_clean_done() stored
 procedure to check that reports exist for the last UTC hour of the
 day being processed, as a way to catch problems. If your crash
 volume does not guarantee one crash per hour, you may want to modify
-this function in socorro/external/postgresql/raw_sql/procs/reports_clean_done.sql
+this function in
+socorro/external/postgresql/raw_sql/procs/reports_clean_done.sql
 and reload the schema
 ::
 
   ./socorro/external/postgresql/setupdb_app.py --database_name=breakpad --dropdb
 
-Refer to :ref:`populatepostgres-chapter` for information about
-populating the database.
-
-This step is *required* to get basic information about existing product names
-and versions into the system.
+(FIXME) new way to add products to the database goes here
 
 Create partitioned reports_* tables
 ------------------------------------------
@@ -202,19 +217,10 @@ on a weekly basis.
 Normally this is handled automatically by the cronjob scheduler
 :ref:`crontabber-chapter` but can be run as a one-off:
 ::
-  make virtualenv
-  . socorro-virtualenv/bin/activate
-  export PYTHONPATH=.
   python socorro/cron/crontabber.py --job=weekly-reports-partitions --force 
 
 Run socorro in dev mode
 ````````````
-
-Set up environment
-::
-  make virtualenv
-  . socorro-virtualenv/bin/activate
-  export PYTHONPATH=.
 
 Copy default config files
 ::
@@ -258,15 +264,8 @@ Generate a test crash:
 See: https://developer.mozilla.org/en/Environment_variables_affecting_crash_reporting
 
 If you already have a crash available and wish to submit it, you can
-use the standalone submitter tool:
-
-Set up environment
-::
-  make virtualenv
-  . socorro-virtualenv/bin/activate
-  export PYTHONPATH=.
-
-Run submitter tool (assuming your crash is called "crash.json" and "crash.dump")
+use the standalone submitter tool (assuming your crash is called "crash.json"
+and "crash.dump")
 ::
   python socorro/collector/submitter_app.py -u http://crash-reports/submit -j crash.json -d crash.dump
 
