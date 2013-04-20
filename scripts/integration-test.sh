@@ -80,10 +80,15 @@ if [ $? != 0 ]
 then
   fatal 1 "setupdb_app.py failed, check setupdb.log"
 fi
-bash tools/dataload/import.sh >> setupdb.log 2>&1
+make fakedata >> setupdb.log 2>&1
 if [ $? != 0 ]
 then
-  fatal 1 "data import failed, check setupdb.log"
+  fatal 1 "fakedata creation failed, check setupdb.log"
+fi
+psql < tmp/import.sql >> setupdb.log 2>&1
+if [ $? != 0 ]
+then
+  fatal 1 "fakedata import failed, check setupdb.log"
 fi
 popd >> setupdb.log 2>&1
 python socorro/cron/crontabber.py --database.database_host=$DB_HOST --database.database_user=$DB_USER --database.database_password=$DB_PASSWORD --job=weekly-reports-partitions --force >> setupdb.log 2>&1
