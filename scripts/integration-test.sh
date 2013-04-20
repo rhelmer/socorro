@@ -85,7 +85,7 @@ if [ $? != 0 ]
 then
   fatal 1 "fakedata creation failed, check setupdb.log"
 fi
-psql < tmp/import.sql >> setupdb.log 2>&1
+psql breakpad < tmp/import.sql >> setupdb.log 2>&1
 if [ $? != 0 ]
 then
   fatal 1 "fakedata import failed, check setupdb.log"
