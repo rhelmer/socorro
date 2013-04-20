@@ -634,6 +634,18 @@ class CrashTypes(BaseTable):
             ['4', 'Hang Plugin', 'hang-p', 'browser', True, 'p', True ],
             ['5', 'Content', 'content', 'content', False, 'T', True  ]]
 
+class ReportPartitionInfo(BaseTable):
+    table = 'report_partition_info'
+    columns = ['table_name', 'build_order', 'keys', 'indexes', 'fkeys']
+    rows = [['reports', 1, '{id,uuid}',
+             '{date_processed,hangid,""product,version"",reason,signature,url}',
+             '{}'],
+            ['plugins_reports', 2, '{""report_id,plugin_id""}',
+             '{""report_id,date_processed""}', '{""(plugin_id) REFERENCES plugins(id)"",""(report_id) REFERENCES reports_WEEKNUM(id)""}'],
+            ['extensions', 3, '{""report_id,extension_key""}',
+             '{""extension_id,extension_version"",""report_id,date_processed""}',
+             '{""(report_id) REFERENCES reports_WEEKNUM(id)""}']]
+
 
 def run():
     # the order that tables are loaded is important.
@@ -641,7 +653,8 @@ def run():
               ReleaseChannels, ProductReleaseChannels, RawADU,
               ReleaseChannelMatches, ReleasesRaw, UptimeLevels,
               WindowsVersions, Reports, OSVersions, ProductProductidMap,
-              ReleaseRepositories, CrontabberState, CrashTypes]
+              ReleaseRepositories, CrontabberState, CrashTypes,
+              ReportPartitionInfo]
 
     start_date = end_date = None
 
