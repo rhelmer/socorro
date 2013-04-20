@@ -78,10 +78,20 @@ class socorro-db inherits socorro-base {
     }
 
     exec {
-        '/bin/bash /home/socorro/dev/socorro/tools/dataload/import.sh':
+        '/usr/bin/make fakedata':
+            alias => 'make-fakedata',
+            cwd => '/home/socorro/dev/socorro',
+            creates => '/home/socorro/dev/socorro/tmp/import.sql',
+            require => Exec['create-breakpad-db'];
+            logoutput => on_failure,
+            user => 'socorro';
+    }
+
+    exec {
+        '/usr/bin/psql < tmp/import.sql':
             alias => 'dataload',
             user => 'postgres',
-            cwd => '/home/socorro/dev/socorro/tools/dataload',
+            cwd => '/home/socorro/dev/socorro/',
             onlyif => '/usr/bin/psql -xt breakpad -c "SELECT count(*) FROM products" | grep "count | 0"',
             logoutput => on_failure,
             require => Exec['create-breakpad-db'];
