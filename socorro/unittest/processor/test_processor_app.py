@@ -45,7 +45,10 @@ class TestProcessorApp(unittest.TestCase):
         )
 
         config.new_crash_source = DotDict()
-        sequence_generator = sequencer(1, 2, None, 3)
+        sequence_generator = sequencer(((1,), {}),
+                                       ((2,), {}),
+                                       None,
+                                       ((3,), {}))
         mocked_new_crash_source = mock.Mock(side_effect=sequence_generator)
         mocked_new_crash_source.id = 'mocked_new_crash_source'
         config.new_crash_source.new_crash_source_class = mock.Mock(
@@ -107,7 +110,7 @@ class TestProcessorApp(unittest.TestCase):
           fake_raw_crash,
           fake_dump
         )
-        pa.destination.save_processed.assert_called_with(7)
+        pa.destination.save_raw_and_processed.assert_called_with(fake_raw_crash, None, 7, 17)
 
     def test_transform_crash_id_missing(self):
         config = self.get_standard_config()

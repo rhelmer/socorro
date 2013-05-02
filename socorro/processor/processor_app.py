@@ -91,7 +91,7 @@ class ProcessorApp(FetchTransformSaveApp):
                 if x is None:
                     yield None
                 else:
-                    yield ((x,), {})  # (args, kwargs)
+                    yield x  # (args, kwargs)
             else:
                 yield None  # if the inner iterator yielded nothing at all,
                             # yield None to give the caller the chance to sleep
@@ -135,7 +135,14 @@ class ProcessorApp(FetchTransformSaveApp):
             raw_crash,
             dumps
           )
-        self.destination.save_processed(processed_crash)
+        """ bug 866973 - save_raw_and_processed() instead of just processed
+            We are doing this in lieu of a queuing solution that could allow
+            us to operate an independent crashmover. When the queuing system
+            is implemented, we could go back to just saving the processed
+            crash, and have the raw crash saved by a crashmover that's
+            consuming crash_ids the same way that the processor consumes them.
+        """
+        self.destination.save_raw_and_processed(raw_crash, None, processed_crash, crash_id)
 
     #--------------------------------------------------------------------------
     def _setup_source_and_destination(self):

@@ -26,6 +26,25 @@ class RegistrationError(Exception):
 
 
 #==============================================================================
+class ProcessorAppNullRegistrationClient(RequiredConfig):
+    """the registrar isn't needed when the monitor is not in use.  This class
+    will stub out the registration system of the processor."""
+    
+    #--------------------------------------------------------------------------
+    def __init__(self, config, quit_check_callback=None):
+        """constructor for a registration object that does nothing at all"""
+        pass
+
+    #--------------------------------------------------------------------------
+    def checkin(self):
+        pass
+    
+    #--------------------------------------------------------------------------
+    def unregister(self):
+        pass
+
+
+#==============================================================================
 class ProcessorAppRegistrationClient(RequiredConfig):
     required_config = Namespace()
     required_config.add_option(
@@ -107,8 +126,11 @@ class ProcessorAppRegistrationClient(RequiredConfig):
         requested_id = self._requested_processor_id(
           self.config.processor_id
         )
-        hostname = os.uname()[1]
-        self.processor_name = "%s_%d" % (hostname, os.getpid())
+        hostname = os.uname()[1].replace('.', '_')
+        self.processor_name = "%s_%d" % (
+            hostname,
+            os.getpid()
+        )
 
         threshold = self.transaction(
           single_value_sql,
