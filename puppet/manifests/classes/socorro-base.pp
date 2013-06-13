@@ -117,7 +117,7 @@ class socorro-base {
     package {
         ['rsyslog', 'libcurl4-openssl-dev', 'libxslt1-dev', 'build-essential',
          'supervisor', 'python-software-properties', 'curl', 'git-core',
-         'memcached']:
+         'memcached', 'npm', 'node-less', 'libsasl2-dev']:
             ensure => latest,
             require => Exec['apt-get-update'];
     }
@@ -242,7 +242,7 @@ class socorro-python inherits socorro-base {
             user => 'socorro';
     }
 
-    exec { '/usr/bin/make reinstall':
+    exec { '/usr/bin/make reinstall VIRTUALENV=socorro-vagrant-virtualenv':
             alias => 'socorro-reinstall',
             cwd => '/home/socorro/dev/socorro',
             timeout => '3600',
