@@ -66,9 +66,9 @@ class socorro-db inherits socorro-base {
     exec { '/usr/bin/make json_enhancements_pg_extension VIRTUALENV=socorro-vagrant-virtualenv':
             alias => 'install-json-enhancements',
             cwd => '/home/socorro/dev/socorro',
+            environment => 'PYTHONPATH=socorro-vagrant-virtualenv/lib/python2.6/site-packages'
             timeout => '3600',
-            require => [Package['postgresql-server-dev-9.2'],
-                        File['postgres-config']],
+            require => Package['postgresql-server-dev-9.2'],
             logoutput => on_failure,
             user => 'socorro';
     }
@@ -79,7 +79,8 @@ class socorro-db inherits socorro-base {
             cwd => '/home/socorro/dev/socorro',
             environment => 'PYTHONPATH=/home/socorro/dev/socorro',
             require => [Exec['socorro-virtualenv'], Exec['createuser'],
-                        Exec['install-json-enhancements']],
+                        Exec['install-json-enhancements'],
+                        File['postgres-config']],
             alias => 'create-breakpad-db',
             timeout => '3600',
             user => 'postgres';
