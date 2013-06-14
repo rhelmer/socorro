@@ -81,7 +81,7 @@ class socorro-db inherits socorro-base {
             require => [Exec['socorro-virtualenv'], Exec['createuser'],
                         Exec['install-json-enhancements'],
                         File['postgres-config'],
-                        Exec['socorro-reinstall']],
+                        Exec['socorro-unittest']],
             alias => 'create-breakpad-db',
             timeout => '3600',
             user => 'postgres';

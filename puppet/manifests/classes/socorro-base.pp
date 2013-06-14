@@ -255,6 +255,15 @@ class socorro-python inherits socorro-base {
             logoutput => on_failure,
             user => 'socorro';
     }
+
+    exec { '/usr/bin/make test VIRTUALENV=socorro-vagrant-virtualenv':
+            alias => 'socorro-unittest',
+            cwd => '/home/socorro/dev/socorro',
+            timeout => '3600',
+            require => Exec['socorro-reinstall'],
+            logoutput => on_failure,
+            user => 'socorro';
+    }
 }
 
 class socorro-web inherits socorro-base {
