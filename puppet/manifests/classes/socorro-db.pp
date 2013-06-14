@@ -67,7 +67,8 @@ class socorro-db inherits socorro-base {
             alias => 'install-json-enhancements',
             cwd => '/home/socorro/dev/socorro',
             timeout => '3600',
-            require => [Package['postgresql'], File['postgres-config']],
+            require => [Package['postgresql-server-dev-9.2'],
+                        File['postgres-config']],
             logoutput => on_failure,
             user => 'socorro';
     }
