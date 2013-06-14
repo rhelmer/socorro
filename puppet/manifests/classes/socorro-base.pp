@@ -256,7 +256,7 @@ class socorro-python inherits socorro-base {
             user => 'socorro';
     }
 
-    exec { '/usr/bin/make test VIRTUALENV=socorro-vagrant-virtualenv':
+    exec { '/usr/bin/make test VIRTUALENV=socorro-vagrant-virtualenv DB_SUPERUSER=socorro':
             alias => 'socorro-unittest',
             cwd => '/home/socorro/dev/socorro',
             timeout => '3600',
