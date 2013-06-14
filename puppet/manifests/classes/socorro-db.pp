@@ -68,7 +68,8 @@ class socorro-db inherits socorro-base {
             cwd => '/home/socorro/dev/socorro',
             environment => 'PYTHONPATH=socorro-vagrant-virtualenv/lib/python2.6/site-packages',
             timeout => '3600',
-            require => Package['postgresql-server-dev-9.2'],
+            require => [Package['postgresql-server-dev-9.2'],
+                        Package['postgresql-contrib-9.2']],
             logoutput => on_failure,
             user => 'socorro';
     }
