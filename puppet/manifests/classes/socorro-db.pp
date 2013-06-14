@@ -80,7 +80,8 @@ class socorro-db inherits socorro-base {
             environment => 'PYTHONPATH=/home/socorro/dev/socorro',
             require => [Exec['socorro-virtualenv'], Exec['createuser'],
                         Exec['install-json-enhancements'],
-                        File['postgres-config']],
+                        File['postgres-config'],
+                        File['socorro-reinstall']],
             alias => 'create-breakpad-db',
             timeout => '3600',
             user => 'postgres';
