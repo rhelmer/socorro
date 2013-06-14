@@ -71,6 +71,7 @@ class socorro-db inherits socorro-base {
             require => [Package['postgresql-server-dev-9.2'],
                         Package['postgresql-contrib-9.2']],
             logoutput => on_failure,
+            path => ['socorro-vagrant-virtualenv/bin', '/bin', '/usr/bin'],
             user => 'socorro';
     }
 
