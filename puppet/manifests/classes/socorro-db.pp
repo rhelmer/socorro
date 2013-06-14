@@ -66,12 +66,10 @@ class socorro-db inherits socorro-base {
     exec { '/usr/bin/make json_enhancements_pg_extension VIRTUALENV=socorro-vagrant-virtualenv':
             alias => 'install-json-enhancements',
             cwd => '/home/socorro/dev/socorro',
-            environment => 'PYTHONPATH=socorro-vagrant-virtualenv/lib/python2.6/site-packages',
             timeout => '3600',
             require => [Package['postgresql-server-dev-9.2'],
                         Package['postgresql-contrib-9.2']],
             logoutput => on_failure,
-            path => ['socorro-vagrant-virtualenv/bin', '/bin', '/usr/bin'],
             user => 'socorro';
     }
 

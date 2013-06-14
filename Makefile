@@ -110,7 +110,8 @@ json_enhancements_pg_extension: virtualenv
     # This is only run manually, as it is a one-time operation
     # to be performed at system installation time, rather than
     # every time Socorro is built
-	if [ ! -f `pg_config --pkglibdir`/json_enhancements.so ]; then sudo $(VIRTUALENV)/bin/pgxn install json_enhancements ; fi
+	#if [ ! -f `pg_config --pkglibdir`/json_enhancements.so ]; then sudo $(VIRTUALENV)/bin/pgxn install json_enhancements ; fi
+	if [ ! -f `pg_config --pkglibdir`/json_enhancements.so ]; then sudo $(VIRTUALENV)/python -c "from pgxnclient import cli; cli.main(['install', 'json_enhancements'])"; fi
 
 webapp-django:
 	if [ ! -d webapp-django ]; then git clone git://github.com/mozilla/socorro-crashstats.git webapp-django; else (cd webapp-django && git pull); fi
