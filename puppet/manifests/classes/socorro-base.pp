@@ -263,7 +263,7 @@ class socorro-test inherits socorro-base {
             alias => 'socorro-unittest',
             cwd => '/home/socorro/dev/socorro',
             timeout => '3600',
-            require => [Exec['socorro-reinstall'], Exec['createuser']],
+            require => [Exec['socorro-reinstall'], Exec['create-roles']],
             logoutput => on_failure,
             user => 'socorro';
     }

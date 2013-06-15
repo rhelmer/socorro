@@ -74,11 +74,22 @@ class socorro-db inherits socorro-base {
     }
 
     exec {
-        '/usr/bin/psql -f sql/roles.sql && /home/socorro/dev/socorro/socorro-vagrant-virtualenv/bin/python socorro/external/postgresql/setupdb_app.py --database_name=breakpad --database_superusername=postgres --fakedata --fakedata_days=15':
+        '/usr/bin/psql -f sql/roles.sql':
+            cwd => '/home/socorro/dev/socorro',
+            environment => 'PYTHONPATH=/home/socorro/dev/socorro',
+            require => [Exec['create-user'],
+                        File['postgres-config']],
+            alias => 'create-roles',
+            timeout => '3600',
+            user => 'postgres';
+    }
+
+    exec {
+        '/home/socorro/dev/socorro/socorro-vagrant-virtualenv/bin/python socorro/external/postgresql/setupdb_app.py --database_name=breakpad --database_superusername=postgres --fakedata --fakedata_days=15':
             unless => '/usr/bin/psql --list breakpad',
             cwd => '/home/socorro/dev/socorro',
             environment => 'PYTHONPATH=/home/socorro/dev/socorro',
-            require => [Exec['socorro-virtualenv'], Exec['createuser'],
+            require => [Exec['socorro-virtualenv'], Exec['create-roles'],
                         Exec['install-json-enhancements'],
                         File['postgres-config'],
                         Exec['socorro-unittest']],
@@ -89,7 +100,7 @@ class socorro-db inherits socorro-base {
 
     exec {
         '/usr/bin/createuser -d -r -s socorro':
-            alias => 'createuser',
+            alias => 'create-user',
             require => [Package['postgresql'], File['postgres-config']],
             onlyif => '/usr/bin/psql -xt template1 -c "SELECT * FROM pg_user WHERE usename = \'socorro\'" | grep "(No rows)"',
             user => 'postgres'
