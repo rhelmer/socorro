@@ -255,6 +255,7 @@ class socorro-python inherits socorro-base {
             logoutput => on_failure,
             user => 'socorro';
     }
+}
 
 class socorro-test inherits socorro-base {
 
