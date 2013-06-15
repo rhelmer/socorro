@@ -256,12 +256,15 @@ class socorro-python inherits socorro-base {
             user => 'socorro';
     }
 
+class socorro-test inherits socorro-base {
+
     exec { '/usr/bin/make test VIRTUALENV=socorro-vagrant-virtualenv DB_SUPERUSER=socorro':
             alias => 'socorro-unittest',
             cwd => '/home/socorro/dev/socorro',
             timeout => '3600',
             require => Exec['socorro-reinstall'],
             logoutput => on_failure,
+            requires => Exec['creatuser'],
             user => 'socorro';
     }
 }

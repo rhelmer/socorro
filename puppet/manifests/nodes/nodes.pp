@@ -1,5 +1,6 @@
 node default {
     include socorro-base
+    include socorro-test
     include socorro-python
     include socorro-web
     include socorro-db
