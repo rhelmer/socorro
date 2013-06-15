@@ -265,7 +265,7 @@ class socorro-test inherits socorro-base {
             timeout => '3600',
             require => Exec['socorro-reinstall'],
             logoutput => on_failure,
-            requires => Exec['creatuser'],
+            require => Exec['creatuser'],
             user => 'socorro';
     }
 }
