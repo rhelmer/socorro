@@ -19,7 +19,7 @@ all:	test
 
 test: test-socorro test-webapp
 
-test-socorro: bootstrap-dev
+test-socorro: bootstrap
 	# jenkins only settings for the pre-configman components
 	# can be removed when all tests are updated to use configman
 	if [ $(WORKSPACE) ]; then cd socorro/unittest/config; cp $(JENKINS_CONF) commonconfig.py; fi;
@@ -98,7 +98,7 @@ analysis: bootstrap
 	rsync akela/target/*.jar analysis/
 	rsync -a socorro-toolbox/src/main/pig/ analysis/
 
-json_enhancements_pg_extension: bootstrap-dev
+json_enhancements_pg_extension: bootstrap
     # This is only run manually, as it is a one-time operation
     # to be performed at system installation time, rather than
     # every time Socorro is built
