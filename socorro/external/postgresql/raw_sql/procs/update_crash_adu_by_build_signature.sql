@@ -20,7 +20,7 @@ AS
             build_type_enum as channel
         FROM build_adu
     JOIN product_versions USING (product_version_id)
-        WHERE adu_date BETWEEN updateday and updateday + 1
+        WHERE adu_date BETWEEN updateday::timestamptz AND updateday::timestamptz + '1 day'::interval
         GROUP BY product_versions.product_name,
             build_adu.build_date,
             build_adu.os_name,
@@ -37,7 +37,7 @@ AS
         FROM reports_clean
         JOIN signatures ON reports_clean.signature_id = signatures.signature_id
         WHERE
-            date_processed BETWEEN updateday and updateday + 1
+            date_processed BETWEEN updateday::timestamptz AND updateday::timestamptz + '1 day'::interval
         GROUP BY build, os_name, reports_clean.signature_id, signatures.signature
     )
     SELECT
