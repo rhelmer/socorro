@@ -459,9 +459,10 @@ As the *root* user:
   chown apache /home/socorro/primaryCrashStore /home/socorro/fallback
   chmod 2775 /home/socorro/primaryCrashStore /home/socorro/fallback
 
-Ensure that the user doing installs owns the install dir:
+Ensure that the user doing installs owns the install dir,
+as the *root* user:
 ::
-  su -c "chown $USER /data/socorro"
+  chown socorro /data/socorro
 
 Install socorro
 ---------------

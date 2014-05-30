@@ -62,7 +62,7 @@ reinstall: install-socorro
 	git rev-parse HEAD > $(PREFIX)/application/socorro/external/postgresql/socorro_revision.txt
 	cp $(PREFIX)/stackwalk/revision.txt $(PREFIX)/application/socorro/external/postgresql/breakpad_revision.txt
 
-install-socorro: webapp-django
+install-socorro: bootstrap-django
 	# package up the tarball in $(PREFIX)
 	# create base directories
 	mkdir -p $(PREFIX)/application
