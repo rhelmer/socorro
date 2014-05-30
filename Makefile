@@ -55,7 +55,7 @@ bootstrap:
 install: bootstrap bootstrap-webapp reinstall
 
 # this a dev-only option, `make install` needs to be run at least once in the checkout (or after `make clean`)
-reinstall: install-socorro 
+reinstall: install-socorro
 	# record current git revision in install dir
 	git rev-parse HEAD > $(PREFIX)/application/socorro/external/postgresql/socorro_revision.txt
 	cp $(PREFIX)/stackwalk/revision.txt $(PREFIX)/application/socorro/external/postgresql/breakpad_revision.txt
