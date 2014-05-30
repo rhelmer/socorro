@@ -46,7 +46,7 @@ test-socorro: bootstrap
 test-webapp: webapp-django
 	# alias to webapp-django
 
-bootstrap:
+bootstrap: bootstrap-django
 	git submodule update --init --recursive
 	if [[ ! "$$(type -p lessc)" ]]; then printf "\e[0;32mlessc not found! less must be installed and lessc on your path to build socorro.\e[0m\n" && exit 1; fi;
 	[ -d $(VIRTUALENV) ] || virtualenv -p python2.6 $(VIRTUALENV)
@@ -114,6 +114,9 @@ json_enhancements_pg_extension: bootstrap
 
 webapp-django: bootstrap
 	cd webapp-django; ./bin/jenkins.sh
+
+bootstrap-django:
+	cd webapp-django; ./bin/bootstrap.sh
 
 stackwalker:
 	# Build JSON stackwalker
