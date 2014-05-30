@@ -484,9 +484,14 @@ Install configuration to system directory
 
 From inside the Socorro checkout, as the *root* user
 ::
-  cp config/*.ini-dist /etc/socorro
+  cp config/\*.ini-dist /etc/socorro
 
-Make sure the copy each *.ini-dist file to *.ini and configure it.
+Make sure the copy each .ini-dist file to .ini and configure it.
+
+In particular, you must change the web server in collector.ini
+and middlware.ini to support Apache mod_wsgi rather than the standalone
+server::
+  wsgi_server_class='socorro.webapi.servers.ApacheModWSGI'
 
 It is highly recommended that you customize the files
 to change default passwords, and include the common_*.ini files
@@ -554,9 +559,12 @@ edit /data/socorro/webapp-django/crashstats/settings/local.py:
   DEV = False
   COMPRESS_OFFLINE = True
   SECRET_KEY = '' # set this to something unique
+  # adjust this for your site!
+  ALLOWED_HOSTS = ['crash-stats.example.com']
 
 Allow Django to create the database tables it needs for managing sessions:
 ::
+  . /data/socorro/webapp-django/virtualenv/bin/activate
   /data/socorro/webapp-django/manage.py syncdb --noinput
 
 Copy the example Apache config into place from the Socorro checkout as the
