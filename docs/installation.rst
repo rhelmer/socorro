@@ -247,7 +247,7 @@ Socorro can install the dependencies into a virtualenv for you.
 You only need to run this once
 ::
   export PATH=$PATH:/usr/pgsql-9.3/bin/
-  make bootstrap
+  make bootstrap bootstrap-webapp
 
 Before running any Socorro components, always make sure that the virtualenv 
 is activated and the PYTHONPATH is set
@@ -315,7 +315,7 @@ Run unit/functional tests
 
 From inside the Socorro checkout
 ::
-  make test webapp-django
+  make test test-webapp
 
 
 Install stackwalker
