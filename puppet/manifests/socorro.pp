@@ -131,7 +131,7 @@ class webapp::socorro {
       owner => 'postgres',
       group => 'postgres',
       ensure => file,
-      Package['postgresql93-server'],
+      require=> Package['postgresql93-server'],
       notify => Service['postgresql-9.3'];
 
     'alembic.ini':
