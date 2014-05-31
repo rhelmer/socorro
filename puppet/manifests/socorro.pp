@@ -121,4 +121,14 @@ class webapp::socorro {
       require => [ Yumrepo['devtools'], Package['yum-plugin-fastestmirror']]
   }
 
+  file {
+    'pg_hba.conf':
+      path => '/var/lib/pgsql/9.3/data/pg_hba.conf',
+      source => '/vagrant/puppet/files/var_lib_pgsql_9.3_data/pg_hba.conf',
+      owner => 'postgres',
+      group => 'postgres',
+      ensure => present,
+      notify => Service['postgresql-9.3'];
+  }
+
 }
