@@ -63,7 +63,7 @@ then
   error $? "could not get old checksum"
 fi
 echo "Downloading socorro.tar.gz"
-#wget -q -O socorro-new.tar.gz -N $URL
+wget -q -O socorro-new.tar.gz -N $URL
 error $? "wget reported failure"
 
 NEW_CSUM=`md5sum socorro-new.tar.gz | awk '{print $1}'`
