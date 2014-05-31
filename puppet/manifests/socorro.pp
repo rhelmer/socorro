@@ -2,6 +2,10 @@
 class webapp::socorro {
 
   service {
+    'iptables':
+      ensure => stopped,
+      enable => false;
+
     'rabbitmq-server':
       ensure  => running,
       enable  => true,
