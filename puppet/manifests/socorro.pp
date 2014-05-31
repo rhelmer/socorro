@@ -156,7 +156,7 @@ class webapp::socorro {
       source => '/vagrant/puppet/files/etc_httpd_conf.d/socorro.conf',
       owner => 'apache',
       ensure => file,
-      require => Package['httpd'];
+      require => Package['httpd'],
       notify => Service['httpd'];
 
     'socorro_crontab':
