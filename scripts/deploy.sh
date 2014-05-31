@@ -33,11 +33,13 @@ error $? "could not set date"
 # ensure socorro user exists
 id socorro > /dev/null
 if [ $? != 0 ]; then
+    echo "Creating socorro user"
     useradd socorro
     error $? "could not create socorro user"
 fi
 
 # ensure base directories exist
+echo "Creating system config, log and crash storage directories"
 mkdir -p /etc/socorro
 error $? "could not create /etc/socorro"
 mkdir -p /var/log/socorro
