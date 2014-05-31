@@ -38,7 +38,7 @@ class webapp::socorro {
       gpgcheck => 0;
 
     'EPEL':
-      baseurl  => 'http://download.fedoraproject.org/pub/epel/$releasever/$basearch',
+      baseurl  => 'http://ftp.osuosl.org/pub/fedora-epel/$releasever/$basearch',
       descr    => 'EPEL',
       enabled  => 1,
       gpgcheck => 0;
