@@ -16,8 +16,8 @@ CONF = _config
 
 
 Vagrant::Config.run do |config|
-  config.vm.box = "CentOS-6.4-i386-v20130427"
-  config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-i386-v20130427.box"
+  config.vm.box = "CentOS 6.5 i386 Minimal"
+  config.vm.box_url = "https://dl.dropbox.com/s/3fgr7lbvcpn51py/centos_6-5_i386.box"
 
   Vagrant.configure("1") do |config|
     config.vm.customize ["modifyvm", :id, "--memory", CONF['memory']]
