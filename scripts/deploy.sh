@@ -46,7 +46,9 @@ mkdir -p /data/socorro
 error $? "could not create /data/socorro"
 chown socorro /var/log/socorro
 error $? "could not chown /var/log/socorro"
-mkdir -p /home/socorro/primaryCrashStore /home/socorro/fallback /home/socorro/persistent
+mkdir -p /home/socorro/primaryCrashStore \
+    /home/socorro/fallback \
+    /home/socorro/persistent
 error $? "could not make socorro crash storage directories"
 chown apache:socorro /home/socorro/primaryCrashStore /home/socorro/fallback
 error $? "could not chown apache on crash storage directories"
@@ -61,7 +63,7 @@ then
   error $? "could not get old checksum"
 fi
 echo "Downloading socorro.tar.gz"
-wget -q -O socorro-new.tar.gz -N $URL
+#wget -q -O socorro-new.tar.gz -N $URL
 error $? "wget reported failure"
 
 NEW_CSUM=`md5sum socorro-new.tar.gz | awk '{print $1}'`
@@ -69,6 +71,8 @@ error $? "could not get new checksum"
 
 if [ "$OLD_CSUM" == "$NEW_CSUM" ]
 then
+  echo "No changes from previous build, aborting"
+  echo "(remove socorro.tar.gz and re-run to proceed anyway)"
   exit 0
 fi
 
@@ -92,21 +96,6 @@ error $? "could not install new Socorro build"
 # move new socorro.tar.gz over old
 mv socorro-new.tar.gz socorro.tar.gz
 
-# create DB if it does not exist
-psql -l | grep breakpad > /dev/null
-if [ $? != 0 ]; then
-    echo "Creating new DB, may take a few minutes"
-    pushd /data/socorro/application > /dev/null
-    error $? "Could not pushd /data/socorro"
-    export PYTHONPATH=.
-    /data/socorro/socorro-virtualenv/bin/python \
-        ./socorro/external/postgresql/setupdb_app.py \
-        --database_name=breakpad --fakedata > /dev/null
-    error $? "Could not create new fakedata DB"
-fi
-popd > /dev/null
-error $? "Could not popd"
-
 # deploy system files
 cp /data/socorro/application/scripts/crons/socorrorc /etc/socorro/
 error $? "could not copy socorrorc"
@@ -124,6 +113,7 @@ if [ ! -f /etc/cron.d/socorro ]; then
     echo "*/5 * * * * socorro /data/socorro/application/scripts/crons/crontabber.sh" > /etc/cron.d/socorro
 fi
 cp /data/socorro/application/config/*.ini-dist /etc/socorro
+error $? "could not copy dist files to /etc/socorro"
 pushd /etc/socorro
 error $? "could not pushd /etc/socorro"
 for file in *.ini-dist; do
@@ -134,6 +124,12 @@ for file in *.ini-dist; do
 done
 popd
 
+# copy system files into install, to catch any overrides
+cp /etc/socorro/*.ini /data/socorro/application/config/
+error $? "could not copy /etc/socorro/*.ini into install"
+cp /etc/socorro/local.py /data/socorro/webapp-django/crashstats/settings/
+error $? "could not copy /etc/socorro/local.py into install"
+
 cp /data/socorro/application/scripts/init.d/socorro-processor /etc/init.d/
 error $? "could not copy socorro-processor init script"
 chkconfig --add socorro-processor
@@ -142,6 +138,34 @@ chkconfig socorro-processor on
 error $? "could not enable socorro-processor init script"
 service socorro-processor restart
 error $? "could not start socorro-processor"
+
+# create DB if it does not exist
+psql -U postgres -h localhost -l | grep breakpad > /dev/null
+if [ $? != 0 ]; then
+    echo "Creating new DB, may take a few minutes"
+    pushd /data/socorro/application > /dev/null
+    error $? "Could not pushd /data/socorro"
+    export PYTHONPATH=.
+    /data/socorro/socorro-virtualenv/bin/python \
+        ./socorro/external/postgresql/setupdb_app.py \
+        --database_name=breakpad --fakedata \
+        --database_superusername=postgres \
+        &> /var/log/socorro/setupdb.log
+    error $? "Could not create new fakedata DB, see \
+        /var/log/socorro/setupdb.log"
+    popd > /dev/null
+    error $? "Could not popd"
+else
+    echo "Running database migrations with alembic"
+    pushd /data/socorro/application > /dev/null
+    error $? "Could not pushd /data/socorro"
+    export PYTHONPATH=.
+    ../socorro-virtualenv/bin/python ../socorro-virtualenv/bin/alembic \
+        -c config/alembic.ini upgrade head > /dev/null
+    error $? "Could not run migraions with alembic"
+    popd > /dev/null
+    error $? "Could not popd"
+fi
 
 if [ -f /etc/init.d/socorro-crashmover ]
 then
@@ -157,6 +181,16 @@ if [ -f /etc/init.d/httpd ]
 then
   /sbin/service httpd restart
   error $? "could not start httpd"
+fi
+
+echo "Running Django syncdb"
+/data/socorro/webapp-django/virtualenv/bin/python \
+    /data/socorro/webapp-django/manage.py syncdb --noinput > /dev/null
+which lessc > /dev/null
+if [ $? != 0 ]; then
+    echo "Installing lessc with npm"
+    npm install -g less > /dev/null
+    error $? "could not npm install -g less"
 fi
 
 echo "Socorro build installed successfully!"

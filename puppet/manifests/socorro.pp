@@ -127,8 +127,41 @@ class webapp::socorro {
       source => '/vagrant/puppet/files/var_lib_pgsql_9.3_data/pg_hba.conf',
       owner => 'postgres',
       group => 'postgres',
-      ensure => present,
+      ensure => file,
       notify => Service['postgresql-9.3'];
+
+    'alembic.ini':
+      path => '/etc/socorro/alembic.ini',
+      source => '/vagrant/puppet/files/config/alembic.ini',
+      ensure => file;
+
+    'collector.ini':
+      path => '/etc/socorro/collector.ini',
+      source => '/vagrant/puppet/files/config/collector.ini',
+      ensure => file;
+
+    'middleware.ini':
+      path => '/etc/socorro/middleware.ini',
+      source => '/vagrant/puppet/files/config/middleware.ini',
+      ensure => file;
+
+    'socorro_apache.conf':
+      path => '/etc/httpd/conf.d/socorro.conf',
+      source => '/vagrant/puppet/files/etc_httpd_conf.d/socorro.conf',
+      owner => 'apache',
+      ensure => file,
+      notify => Service['httpd'];
+
+    'socorro_crontab':
+      path => '/etc/cron.d/socorro',
+      source => '/vagrant/puppet/files/etc_cron.d/socorro',
+      owner => 'root',
+      ensure => file;
+
+    'socorro_django_local.py':
+      path => '/etc/socorro/local.py',
+      source => '/vagrant/puppet/files/config/local.py',
+      ensure => file;
   }
 
 }
