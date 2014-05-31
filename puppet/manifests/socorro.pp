@@ -9,7 +9,10 @@ class webapp::socorro {
     'httpd':
       ensure  => running,
       enable  => true,
-      require => Package['httpd'];
+      require => [
+        Package['httpd'],
+        File['socorro_apache.conf'],
+      ];
 
     'memcached':
       ensure  => running,
@@ -27,6 +30,7 @@ class webapp::socorro {
       require => [
           Package['postgresql93-server'],
           Exec['postgres-initdb'],
+          File['pg_hba.conf'],
         ];
 
     'elasticsearch':
