@@ -2,9 +2,15 @@
 class webapp::socorro {
 
   service {
-    'iptables':
-      ensure => stopped,
-      enable => false;
+    'httpd':
+      ensure  => running,
+      enable  => true,
+      require => Package['httpd'];
+
+    'memcached':
+      ensure  => running,
+      enable  => true,
+      require => Package['memcached'];
 
     'rabbitmq-server':
       ensure  => running,
@@ -68,6 +74,10 @@ class webapp::socorro {
       'openldap-devel',
       'java-1.7.0-openjdk',
       'yum-plugin-fastestmirror',
+      'httpd',
+      'mod_wsgi',
+      'memcached',
+      'daemonize',
     ]:
     ensure => latest
   }
