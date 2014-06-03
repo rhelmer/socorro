@@ -52,9 +52,9 @@ class PostgreSQLAlchemyManager(object):
         if not self.min_ver_check("9.3.0"):
             self.session.execute(
                 'CREATE EXTENSION IF NOT EXISTS json_enhancements')
-        self.session.execute('CREATE SCHEMA bixie')
-        self.session.execute(
-            'GRANT ALL ON SCHEMA bixie, public TO breakpad_rw')
+        #self.session.execute('CREATE SCHEMA bixie')
+        #self.session.execute(
+        #    'GRANT ALL ON SCHEMA bixie, public TO breakpad_rw')
 
     def setup(self):
         self.session.execute('SET check_function_bodies = false')
@@ -534,7 +534,7 @@ class SocorroDB(App):
         self.database_port = self.config.get('database_port')
 
         url_template = connection_url()
-        sa_url = url_template + '/%s' % 'postgres'
+        sa_url = url_template + '/%s' % 'd3o2qlg6vfq2g7'
 
         if self.config.unlogged:
             @compiles(CreateTable)
@@ -576,8 +576,8 @@ class SocorroDB(App):
             try:
                 # work around for autocommit behavior
                 connection.execute('commit')
-                connection.execute("CREATE DATABASE %s ENCODING 'utf8'" %
-                                   self.database_name)
+                #connection.execute("CREATE DATABASE %s ENCODING 'utf8'" %
+                #                   self.database_name)
             except ProgrammingError, e:
                 if re.match(
                     'database "%s" already exists' % self.database_name,
@@ -587,7 +587,7 @@ class SocorroDB(App):
                     return 0
                 raise
 
-            db.create_roles(self.config)
+            #db.create_roles(self.config)
             connection.close()
 
         # Reconnect to set up bixie schema, types and procs
@@ -602,18 +602,18 @@ class SocorroDB(App):
                 return 0
             db.create_types()
             db.create_procs()
-            db.set_sequence_owner('breakpad_rw')
+            #db.set_sequence_owner('breakpad_rw')
             db.commit()
             db.create_tables()
-            db.set_table_owner('breakpad_rw')
+            #db.set_table_owner('breakpad_rw')
             db.create_views()
             db.commit()
-            db.set_grants(self.config)  # config has user lists
+            #db.set_grants(self.config)  # config has user lists
             if self.config['fakedata']:
                 self.generate_fakedata(db, self.config['fakedata_days'])
             db.commit()
             command.stamp(alembic_cfg, "head")
-            db.set_default_owner(self.database_name)
+            #db.set_default_owner(self.database_name)
             db.session.close()
 
         return 0
