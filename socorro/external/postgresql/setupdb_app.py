@@ -534,7 +534,7 @@ class SocorroDB(App):
         self.database_port = self.config.get('database_port')
 
         url_template = connection_url()
-        sa_url = url_template + '/%s' % 'd3o2qlg6vfq2g7'
+        sa_url = url_template + '/%s' % self.database_name
 
         if self.config.unlogged:
             @compiles(CreateTable)
