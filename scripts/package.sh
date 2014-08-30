@@ -16,6 +16,11 @@ if [ ! -d "$BUILD_DIR" ]; then
     exit 1
 fi
 
+# Copy in production-style defaults
+cp -rp ./config/package/* $BUILD_DIR/etc/
+ln -fs /etc/socorro/local.py \
+    build/data/socorro/webapp-django/crashstats/settings/local.py
+
 echo "> Building Socorro $VERSION ..."
 fpm -s dir -t $TYPE \
     -v $VERSION \
