@@ -780,8 +780,7 @@ class MissingSymbolsRule(Rule):
         else:
             return False
 
-        if 'modules' in processed_crash['json_dump'] and \
-            'date_processed' in processed_crash:
+        if 'modules' in processed_crash['json_dump']:
             date_processed = processed_crash['date_processed']
             for module in processed_crash['json_dump']['modules']:
                 if 'missing_symbols' in module and module['missing_symbols']:
