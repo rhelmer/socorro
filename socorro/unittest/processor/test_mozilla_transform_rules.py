@@ -1874,6 +1874,16 @@ class TestMissingSymbols(TestCase):
                     "debug_file": "some-file.pdb",
                     "missing_symbols": True,
                 },
+                {
+                    "debug_id": "BCDEFGH",
+                    "debug_file": "other-file.pdb",
+                    "missing_symbols": False,
+                },
+                {
+                    "debug_id": "CDEFGHI",
+                    "debug_file": "yet-another-file.pdb",
+                    "missing_symbols": True,
+                },
             ]
         }
 
@@ -1885,6 +1895,8 @@ class TestMissingSymbols(TestCase):
         rule.act(raw_crash, raw_dumps, processed_crash, processor_meta)
 
         from socorro.external.postgresql.dbapi2_util import execute_no_results
+        eq_(config.transaction_executor_class.return_value.call_count, 2)
         config.transaction_executor_class.return_value.assert_called_with(
-            execute_no_results, rule.sql, ('now', 'some-file.pdb', 'ABCDEFG')
+            execute_no_results, rule.sql,
+                ('now', 'yet-another-file.pdb', 'CDEFGHI')
         )

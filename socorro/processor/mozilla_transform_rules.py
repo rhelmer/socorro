@@ -794,8 +794,6 @@ class MissingSymbolsRule(Rule):
                             "WARNING: missing symbols rule failed for"
                             " %s" % raw_crash.uuid
                         )
-                else:
-                    return False
         else:
             return False
 
