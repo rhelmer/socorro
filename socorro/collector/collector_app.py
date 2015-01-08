@@ -64,8 +64,8 @@ class CollectorApp(App):
     required_config.storage.add_option(
         'crashstorage_class',
         doc='the source storage class',
-        default='socorro.external.fs.crashstorage'
-                '.FSLegacyDatedRadixTreeStorage',
+        default='socorro.external.filesystem.crashstorage'
+                '.FileSystemRawCrashStorage',
         from_string_converter=class_converter
     )
 

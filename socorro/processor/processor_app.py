@@ -52,8 +52,8 @@ class ProcessorApp(FetchTransformSaveApp):
     required_config.new_crash_source.add_option(
       'new_crash_source_class',
       doc='an iterable that will stream crash_ids needing processing',
-      default='socorro.external.rabbitmq.rmq_new_crash_source'
-              '.RMQNewCrashSource',
+      default='socorro.external.filesystem.crashstorage'
+              '.FileSystemRawCrashStorage',
       from_string_converter=class_converter
     )
     #--------------------------------------------------------------------------
@@ -82,7 +82,7 @@ class ProcessorApp(FetchTransformSaveApp):
     def get_application_defaults():
         return {
             "source.crashstorage_class": FileSystemRawCrashStorage,
-            "destination.crashstorage_class": PolyCrashStorage,
+            "destination.crashstorage_class": FileSystemRawCrashStorage,
         }
 
     #--------------------------------------------------------------------------
