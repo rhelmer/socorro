@@ -17,6 +17,9 @@ from socorro.external.crashstorage_base import (
   CrashIDNotFound,
 )
 from socorro.lib.util import DotDict
+from socorro.external.fs.fs_new_crash_source import (
+  FSNewCrashSource
+)
 
 
 #==============================================================================
@@ -52,8 +55,8 @@ class ProcessorApp(FetchTransformSaveApp):
     required_config.new_crash_source.add_option(
       'new_crash_source_class',
       doc='an iterable that will stream crash_ids needing processing',
-      default='socorro.external.filesystem.crashstorage'
-              '.FileSystemRawCrashStorage',
+      default='socorro.external.fs.fs_new_crash_source'
+              '.FSNewCrashSource',
       from_string_converter=class_converter
     )
     #--------------------------------------------------------------------------
