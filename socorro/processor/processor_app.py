@@ -11,7 +11,6 @@ from configman import Namespace
 from configman.converters import class_converter
 
 from socorro.app.fetch_transform_save_app import FetchTransformSaveApp, main
-from socorro.external.filesystem.crashstorage import FileSystemRawCrashStorage
 from socorro.external.crashstorage_base import (
   PolyCrashStorage,
   CrashIDNotFound,
@@ -20,6 +19,7 @@ from socorro.lib.util import DotDict
 from socorro.external.fs.fs_new_crash_source import (
   FSNewCrashSource
 )
+from socorro.external.fs.crashstorage import FSLegacyDatedRadixTreeStorage
 
 
 #==============================================================================
@@ -84,8 +84,8 @@ class ProcessorApp(FetchTransformSaveApp):
     @staticmethod
     def get_application_defaults():
         return {
-            "source.crashstorage_class": FileSystemRawCrashStorage,
-            "destination.crashstorage_class": FileSystemRawCrashStorage,
+            "source.crashstorage_class": FSLegacyDatedRadixTreeStorage,
+            "destination.crashstorage_class": FSLegacyDatedRadixTreeStorage,
         }
 
     #--------------------------------------------------------------------------
