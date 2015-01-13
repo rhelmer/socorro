@@ -209,48 +209,48 @@ class HybridCrashProcessor(RequiredConfig):
         else:
             self.quit_check = lambda: False
         self.database = self.config.database_class(config)
-        self.transaction = \
-            self.config.transaction_executor_class(
-                config,
-                self.database,
-                quit_check_callback
-            )
+#        self.transaction = \
+#            self.config.transaction_executor_class(
+#                config,
+#                self.database,
+#                quit_check_callback
+#            )
 
         self.rule_system = DotDict()
 
-        self.rule_system.processed_transform = self._load_transform_rules(
-            "processor.processed"
-        )
-
-        self.rule_system.raw_crash_transform = self._load_transform_rules(
-            "processor.json_rewrite"
-        )
-
-        self.rule_system.skunk_classifier = self._load_transform_rules(
-            "processor.classifiers"
-        )
-        if not self.rule_system.skunk_classifier.rules:
-            self.config.logger.info(
-                'falling back to default skunk_classifier rules'
-            )
-            from socorro.processor.skunk_classifiers import \
-                default_classifier_rules
-            self.rule_system.skunk_classifier.load_rules(
-                default_classifier_rules
-            )
-
-        self.rule_system.support_classifier = self._load_transform_rules(
-            "processor.support_classifiers"
-        )
-        if not self.rule_system.support_classifier.rules:
-            self.config.logger.info(
-                'falling back to default support_classifier rules'
-            )
-            from socorro.processor.support_classifiers import \
-                default_support_classifier_rules
-            self.rule_system.support_classifier.load_rules(
-                default_support_classifier_rules
-            )
+#        self.rule_system.processed_transform = self._load_transform_rules(
+#            "processor.processed"
+#        )
+#
+#        self.rule_system.raw_crash_transform = self._load_transform_rules(
+#            "processor.json_rewrite"
+#        )
+#
+#        self.rule_system.skunk_classifier = self._load_transform_rules(
+#            "processor.classifiers"
+#        )
+#        if not self.rule_system.skunk_classifier.rules:
+#            self.config.logger.info(
+#                'falling back to default skunk_classifier rules'
+#            )
+#            from socorro.processor.skunk_classifiers import \
+#                default_classifier_rules
+#            self.rule_system.skunk_classifier.load_rules(
+#                default_classifier_rules
+#            )
+#
+#        self.rule_system.support_classifier = self._load_transform_rules(
+#            "processor.support_classifiers"
+#        )
+#        if not self.rule_system.support_classifier.rules:
+#            self.config.logger.info(
+#                'falling back to default support_classifier rules'
+#            )
+#            from socorro.processor.support_classifiers import \
+#                default_support_classifier_rules
+#            self.rule_system.support_classifier.load_rules(
+#                default_support_classifier_rules
+#            )
 
         # *** originally from the ExternalProcessor class
         #preprocess the breakpad_stackwalk command line
@@ -342,12 +342,12 @@ class HybridCrashProcessor(RequiredConfig):
             # transformation of raw_crash to processed_crash.
             # Notice that these rules use a different signature that the other
             # rule systems - it would be nice to unify them someday
-            self.rule_system.raw_crash_transform.apply_all_rules(
-                raw_crash,
-                raw_dumps,
-                processed_crash,
-                self
-            )
+#            self.rule_system.raw_crash_transform.apply_all_rules(
+#                raw_crash,
+#                raw_dumps,
+#                processed_crash,
+#                self
+#            )
 
             #..................................................................
             # apply raw to processed transform
@@ -393,59 +393,59 @@ class HybridCrashProcessor(RequiredConfig):
 
             #..................................................................
             # apply processed_transform rules
-            try:
-                self.rule_system.processed_transform \
-                    .apply_all_rules(
-                        raw_crash,
-                        raw_dumps,
-                        processed_crash,
-                        self
-                    )
-            except Exception, x:
-                # let's catch any unexpected error here and not let them
-                # derail the rest of the processing.
-                self.config.logger.error(
-                    'processed_transform rules have failed: %s',
-                    str(x),
-                    exc_info=True
-                )
+#            try:
+#                self.rule_system.processed_transform \
+#                    .apply_all_rules(
+#                        raw_crash,
+#                        raw_dumps,
+#                        processed_crash,
+#                        self
+#                    )
+#            except Exception, x:
+#                # let's catch any unexpected error here and not let them
+#                # derail the rest of the processing.
+#                self.config.logger.error(
+#                    'processed_transform rules have failed: %s',
+#                    str(x),
+#                    exc_info=True
+#                )
 
             #..................................................................
             # apply skunk classifier rules
-            try:
-                self.rule_system.skunk_classifier.apply_until_action_succeeds(
-                    raw_crash,
-                    raw_dumps,
-                    processed_crash,
-                    self
-                )
-            except Exception, x:
-                # let's catch any unexpected error here and not let them
-                # derail the rest of the processing.
-                self.config.logger.error(
-                    'skunk classifiers have failed: %s',
-                    str(x),
-                    exc_info=True
-                )
+#            try:
+#                self.rule_system.skunk_classifier.apply_until_action_succeeds(
+#                    raw_crash,
+#                    raw_dumps,
+#                    processed_crash,
+#                    self
+#                )
+#            except Exception, x:
+#                # let's catch any unexpected error here and not let them
+#                # derail the rest of the processing.
+#                self.config.logger.error(
+#                    'skunk classifiers have failed: %s',
+#                    str(x),
+#                    exc_info=True
+#                )
 
             #..................................................................
             # apply support classifier rules
-            try:
-                self.rule_system.support_classifier \
-                    .apply_until_action_succeeds(
-                        raw_crash,
-                        raw_dumps,
-                        processed_crash,
-                        self
-                    )
-            except Exception, x:
-                # let's catch any unexpected error here and not let them
-                # derail the rest of the processing.
-                self.config.logger.error(
-                    'support classifiers have failed: %s',
-                    str(x),
-                    exc_info=True
-                )
+#            try:
+#                self.rule_system.support_classifier \
+#                    .apply_until_action_succeeds(
+#                        raw_crash,
+#                        raw_dumps,
+#                        processed_crash,
+#                        self
+#                    )
+#            except Exception, x:
+#                # let's catch any unexpected error here and not let them
+#                # derail the rest of the processing.
+#                self.config.logger.error(
+#                    'support classifiers have failed: %s',
+#                    str(x),
+#                    exc_info=True
+#                )
 
             #..................................................................
             # end of transforms
@@ -1360,44 +1360,45 @@ class HybridCrashProcessor(RequiredConfig):
 
     #--------------------------------------------------------------------------
     def _load_transform_rules(self, rule_category):
-        sql = (
-            "select predicate, predicate_args, predicate_kwargs, "
-            "       action, action_args, action_kwargs "
-            "from transform_rules "
-            "where "
-            "  category = %s"
-        )
-        try:
-            rules = self.transaction(
-                execute_query_fetchall,
-                sql,
-                (rule_category,)
-            )
-        except Exception:
-            self.config.logger.warning(
-                'Unable to load trasform rules from the database, falling back'
-                ' to defaults',
-                exc_info=True
-            )
-            rules = []
-        # The rule system was written for an older version of the processor.
-        # There is data in the database that refers to the dynamic loading of
-        # python modules, but only for the old processor.  This next code block
-        # takes the reference to the old code and replaces them with
-        # references to the equivalent modules in the new code.
-        translated_rules = [(x[0].replace('processor.processor',
-                                          'processor.hybrid_processor'),
-                             x[1],
-                             x[2],
-                             x[3].replace('processor.processor',
-                                          'processor.hybrid_processor'),
-                             x[4],
-                             x[5])
-                            for x in rules]
-        rule_system = TransformRuleSystem(self.config)
-        rule_system.load_rules(translated_rules)
-
-        return rule_system
+        pass
+#        sql = (
+#            "select predicate, predicate_args, predicate_kwargs, "
+#            "       action, action_args, action_kwargs "
+#            "from transform_rules "
+#            "where "
+#            "  category = %s"
+#        )
+#        try:
+#            rules = self.transaction(
+#                execute_query_fetchall,
+#                sql,
+#                (rule_category,)
+#            )
+#        except Exception:
+#            self.config.logger.warning(
+#                'Unable to load trasform rules from the database, falling back'
+#                ' to defaults',
+#                exc_info=True
+#            )
+#            rules = []
+#        # The rule system was written for an older version of the processor.
+#        # There is data in the database that refers to the dynamic loading of
+#        # python modules, but only for the old processor.  This next code block
+#        # takes the reference to the old code and replaces them with
+#        # references to the equivalent modules in the new code.
+#        translated_rules = [(x[0].replace('processor.processor',
+#                                          'processor.hybrid_processor'),
+#                             x[1],
+#                             x[2],
+#                             x[3].replace('processor.processor',
+#                                          'processor.hybrid_processor'),
+#                             x[4],
+#                             x[5])
+#                            for x in rules]
+#        rule_system = TransformRuleSystem(self.config)
+#        rule_system.load_rules(translated_rules)
+#
+#        return rule_system
 
     #--------------------------------------------------------------------------
     @contextmanager
@@ -1470,21 +1471,22 @@ class HybridCrashProcessor(RequiredConfig):
 
     #--------------------------------------------------------------------------
     def _load_product_id_map(self):
-        try:
-            sql = "SELECT product_name, productid, rewrite FROM " \
-                  "product_productid_map WHERE rewrite IS TRUE"
-            product_mappings = self.transaction(
-                execute_query_fetchall,
-                sql
-            )
-        except Exception:
-            self.config.logger.error('Unable to load product_productid_map',
-                                     exc_info=True)
-            raise
-
-        for row in product_mappings:
-            self._product_id_map[row[1]] = {'product_name': row[0],
-                                            'rewrite': row[2]}
+        pass
+#        try:
+#            sql = "SELECT product_name, productid, rewrite FROM " \
+#                  "product_productid_map WHERE rewrite IS TRUE"
+#            product_mappings = self.transaction(
+#                execute_query_fetchall,
+#                sql
+#            )
+#        except Exception:
+#            self.config.logger.error('Unable to load product_productid_map',
+#                                     exc_info=True)
+#            raise
+#
+#        for row in product_mappings:
+#            self._product_id_map[row[1]] = {'product_name': row[0],
+#                                            'rewrite': row[2]}
 
 
 #==============================================================================
