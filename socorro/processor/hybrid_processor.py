@@ -68,14 +68,14 @@ class HybridCrashProcessor(RequiredConfig):
     required_config.add_option(
         'stackwalk_command_line',
         doc='the template for the command to invoke stackwalker',
-        default='timeout -s KILL 30 $minidump_stackwalk_pathname --raw-json $rawfilePathname --pipe $dumpfilePathname '
+        default='$minidump_stackwalk_pathname --raw-json $rawfilePathname --pipe $dumpfilePathname '
         '$processor_symbols_pathname_list 2>/dev/null',
     )
     required_config.add_option(
         'minidump_stackwalk_pathname',
         doc='the full pathname of the extern program stackwalker '
         '(quote path with embedded spaces)',
-        default='/data/socorro/stackwalk/bin/stackwalker',
+        default='./minidump-stackwalk/stackwalker',
     )
     required_config.add_option(
         'symbol_cache_path',

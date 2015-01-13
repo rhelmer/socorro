@@ -231,9 +231,9 @@ class ThreadedTaskManager(TaskManager):
                             wait_reason='waiting for queue to drain'
                         )
                         raise KeyboardInterrupt
-                    self.logger.info("there is nothing to do.  Sleeping "
-                                     "for %d seconds" %
-                                     self.config.idle_delay)
+                    self.logger.debug("there is nothing to do.  Sleeping "
+                                      "for %d seconds" %
+                                      self.config.idle_delay)
                     self._responsive_sleep(self.config.idle_delay)
                     continue
                 self.quit_check()

@@ -154,9 +154,9 @@ class TaskManager(RequiredConfig):
                     if job_params is None:
                         if self.config.quit_on_empty_queue:
                             raise KeyboardInterrupt
-                        self.logger.info("there is nothing to do.  Sleeping "
-                                         "for %d seconds" %
-                                         self.config.idle_delay)
+                        self.logger.debug("there is nothing to do.  Sleeping "
+                                          "for %d seconds" %
+                                          self.config.idle_delay)
                         self._responsive_sleep(self.config.idle_delay)
                         continue
                     self.quit_check()
