@@ -13,7 +13,7 @@ socorrolite_processor_rule_sets = [
         "processor.json_rewrite",
         "socorro.lib.transform_rules.TransformRuleSystem",
         "apply_all_rules",
-
+        ""
     ],
     [   # rules to transform a raw crash into a processed crash
         "raw_to_processed_transform",
