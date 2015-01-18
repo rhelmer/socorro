@@ -22,6 +22,7 @@ socorrolite_processor_rule_sets = [
         "apply_all_rules",
         "socorro.processor.general_transform_rules.IdentifierRule, "
         "socorro.processor.breakpad_transform_rules.BreakpadStackwalkerRule, "
+        "socorro.processor.mozilla_transform_rules.DatesAndTimesRule, "
     ],
     [   # post processing of the processed crash
         "processed_transform",
