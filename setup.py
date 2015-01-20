@@ -32,7 +32,7 @@ setup(
     keywords=['socorro', 'breakpad', 'crash', 'reporting', 'minidump',
               'stacktrace'],
     packages=find_packages(),
-    install_requires=['configman==1.2.8', 'configobj==4.7.2',
+    install_requires=['alembic==0.6.4', 'configman==1.2.8', 'configobj==4.7.2',
         'isodate==0.4.7', 'lxml==2.3.4', 'pika==0.9.8',
         'elasticsearch==1.2', 'elasticsearch-dsl==0.0.2',
         'pyelasticsearch==0.6.1', 'urllib3==1.9.1', 'elasticutils==0.7',
@@ -43,7 +43,7 @@ setup(
         'pyquery==1.2.6', 'python-memcached==1.48', 'BeautifulSoup==3.2.1',
         'path.py==5.1', 'sasl==0.1.3', 'pyOpenSSL==0.14',
         'ndg-httpsclient==0.3.2', 'pyasn1==0.1.7', 'poster==0.8.1',
-        'psycopg2==2.4.5', 'pyhs2==0.6.0'],
+        'psycopg2==2.4.5', 'pyhs2==0.6.0', 'thrift==0.8.0', 'hbase-thrift==0.20.4'],
     entry_points={
         'console_scripts': [
                 'socorro = socorro.app.socorro_app:SocorroWelcomeApp.run'
