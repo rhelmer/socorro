@@ -27,7 +27,7 @@ class ProcessorApp(FetchTransformSaveApp):
 
     required_config = Namespace()
     # configuration is broken into three namespaces: processor,
-    # new_crash_source, and registrar
+    # new_crash_source, and companion_process
     #--------------------------------------------------------------------------
     # processor namespace
     #     this namespace is for config parameter having to do with the
@@ -56,9 +56,9 @@ class ProcessorApp(FetchTransformSaveApp):
       from_string_converter=class_converter
     )
     #--------------------------------------------------------------------------
-    # registrar namespace
+    # companion_process namespace
     #     this namespace is for config parameters having to do with registering
-    #     the processor so that the monitor is aware of it.
+    #     a companion process that runs alongside processor
     #--------------------------------------------------------------------------
     required_config.namespace('companion_process')
     required_config.companion_process.add_option(
