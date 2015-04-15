@@ -95,6 +95,9 @@ PYTHONPATH=$PYTHONPATH $SETUPDB --database_name=socorro_test --dropdb --no_schem
 
 PYTHONPATH=$PYTHONPATH $SETUPDB --database_name=socorro_migration_test --dropdb --logging.stderr_error_logging_level=40 --unlogged
 
+export PGPASSWORD=aPassword
+pg_dumpall -h jenkins-pg92 -U test
+
 PYTHONPATH=$PYTHONPATH ${VIRTUAL_ENV}/bin/alembic -c config/alembic.ini downgrade -1
 PYTHONPATH=$PYTHONPATH ${VIRTUAL_ENV}/bin/alembic -c config/alembic.ini upgrade heads
 
