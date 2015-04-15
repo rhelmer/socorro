@@ -70,6 +70,7 @@ fi
 # jenkins requires a different alembic default
 if [ $WORKSPACE ]; then
     sed -i 's:localhost:jenkins-pg92:' config/alembic.ini-dist
+    cp config/alembic.ini-dist config/alembic.ini
 fi
 
 # jenkins only settings for the pre-configman components
