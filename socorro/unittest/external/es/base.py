@@ -33,6 +33,7 @@ DEFAULT_VALUES = {
 
 CRON_JOB_EXTA_VALUES = {
     'resource.elasticsearch.backoff_delays': [1],
+    'resource.postgresql.database_name': 'socorro_integration_test',
 }
 
 
