@@ -33,6 +33,13 @@ processing working on a single node via Consul's REST interface::
     curl -s -X PUT -d "socorro.webapi.servers.WSGIServer" localhost:8500/v1/kv/socorro/collector/web_server.wsgi_server_class
     curl -s -X PUT -d "/path/to/your/symbols" localhost:8500/v1/kv/socorro/processor/processor.raw_to_processed_transform.BreakpadStackwalkerRule.processor_symbols_pathname_list
 
+.. sidebar:: Breakpad client and symbols
+
+   Socorro aggregates and reports on Breakpad crashes.
+   Read more about `getting started with Breakpad <http://code.google.com/p/google-breakpad/wiki/GettingStartedWithBreakpad>`_.
+
+   You will need to `produce symbols for your application <http://code.google.com/p/google-breakpad/wiki/LinuxStarterGuide#Producing_symbols_for_your_application>`_ and make these files available to Socorro.
+
 Note that Consul also has a Web UI you can use to get/set keys if you prefer.
 
 You can see that the keys are getting set in the environment correctly
